@@ -84,8 +84,6 @@
       <div class="nav-title">Painel</div>
       <button class="nav-item active"><span class="nav-dot"></span> Ofertas</button>
       <button class="nav-item" id="sideRefresh"><span class="nav-dot"></span> Atualizar dados</button>
-      <div class="nav-title">Atalhos</div>
-      <button class="nav-item" onclick="location.href=\'./checkout.html\'"><span class="nav-dot"></span> Checkout</button>
       <div class="side-status">
         <div class="status-line"><span class="online-dot"></span> Caçador online</div>
         <p id="sideStatusText">Aguardando última atualização.</p>
@@ -96,7 +94,7 @@
     <section class="main">
       <div class="mobile-head"><div class="brand"><span class="orb-mark"></span> ORB</div><button id="mobileLogout" class="mobile-logout">Sair</button></div>
       <header class="topbar">
-        <div class="headline"><h1>Bom dia 👋</h1><div id="updated" class="updated"><span class="dot"></span><span>Carregando dados...</span></div></div>
+        <div class="headline"><h1 id="greeting">Olá 👋</h1><div id="updated" class="updated"><span class="dot"></span><span>Carregando dados...</span></div></div>
         <div class="top-actions"><button id="refreshBtn" class="icon-btn"><span>↻</span><span class="label">Atualizar</span></button></div>
       </header>
 
@@ -146,6 +144,13 @@
   const savePosted = (set) => localStorage.setItem(postedKey, JSON.stringify([...set]));
   const fmt = (n) => Number(n || 0).toLocaleString('pt-BR');
 
+  function updateGreeting(){
+    const hour = new Date().getHours();
+    const text = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+    const el = $('greeting');
+    if(el) el.textContent = `${text} 👋`;
+  }
+
   function toast(message){ toastEl.textContent = message; toastEl.classList.add('show'); clearTimeout(window.__orbToast); window.__orbToast = setTimeout(() => toastEl.classList.remove('show'), 1800); }
   function signal(o){
     const d = Number(o.desconto_pct || 0), s = Number(o.score || 0), drop = Number(o.queda_vs_media_pct || 0);
@@ -174,6 +179,9 @@
     $('authSwitchBtn').textContent = creating ? 'Entrar' : 'Criar conta';
     $('password').setAttribute('autocomplete', creating ? 'new-password' : 'current-password');
   }
+
+  updateGreeting();
+  setInterval(updateGreeting, 60000);
 
   async function authAction(){
     const email = $('email').value.trim();
@@ -211,10 +219,11 @@
   }
   async function syncSubscription(){
     try {
-      await sb.functions.invoke('orb-subscription', { body: { action: 'sync' } });
+      await sb.functions.invoke('orb-create-subscription', { body: { action: 'sync' } });
     } catch (_) {}
   }
   async function showApp(){
+    updateGreeting();
     loginView.classList.add('hidden');
     appView.classList.remove('hidden');
     await syncSubscription();
