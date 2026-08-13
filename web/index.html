@@ -85,7 +85,7 @@
       <button class="nav-item active"><span class="nav-dot"></span> Ofertas</button>
       <button class="nav-item" id="sideRefresh"><span class="nav-dot"></span> Atualizar dados</button>
       <div class="nav-title">Atalhos</div>
-      <button class="nav-item" onclick="location.href='./checkout.html'"><span class="nav-dot"></span> Checkout</button>
+      <button class="nav-item" onclick="location.href=\'./checkout.html\'"><span class="nav-dot"></span> Checkout</button>
       <div class="side-status">
         <div class="status-line"><span class="online-dot"></span> Caçador online</div>
         <p id="sideStatusText">Aguardando última atualização.</p>
@@ -230,7 +230,7 @@
       const denied = msg.includes('unauthorized') || msg.includes('not found') || msg.includes('permission') || msg.includes('403');
       $('updated').innerHTML = `<span class="dot" style="background:#d34848"></span><span>${denied ? 'Conta sem acesso liberado.' : 'Ainda não há dados publicados.'}</span>`;
       $('grid').innerHTML = denied
-        ? '<div class="empty"><b>Seu login existe, mas o acesso ainda não está ativo.</b><div style="margin:10px 0 16px">Assine a ORB para liberar o painel.</div><button class="action copy" style="max-width:280px" onclick="location.href='./checkout.html'">Assinar ORB — R$ 39,90/mês</button></div>'
+        ? '<div class="empty"><b>Seu login existe, mas o acesso ainda não está ativo.</b><div style="margin:10px 0 16px">Assine a ORB para liberar o painel.</div><button class="action copy" style="max-width:280px" onclick="location.href=\'./checkout.html\'">Assinar ORB — R$ 39,90/mês</button></div>'
         : '<div class="empty"><b>Nenhuma fila publicada ainda.</b>Assim que o Caçador enviar o primeiro latest.json, ela aparece aqui.</div>';
       return;
     }
