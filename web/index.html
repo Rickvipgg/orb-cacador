@@ -31,6 +31,7 @@
     .auth-story .brand{position:relative;z-index:2}.auth-story .brand .orb-mark:before{background:#fff}.auth-story-copy{position:relative;z-index:2;max-width:580px}.eyebrow{font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.14em;color:#aeb5ff}.auth-story h1{font-size:clamp(42px,5.5vw,78px);line-height:.98;letter-spacing:-.065em;margin:12px 0 18px;max-width:720px}.auth-story p{font-size:17px;line-height:1.65;color:#bcbcc7;max-width:540px;margin:0}.auth-foot{position:relative;z-index:2;font-size:12px;color:#767681}
     .auth-form-wrap{display:grid;place-items:center;padding:34px}.login-card{width:min(100%,430px)}.login-card h2{font-size:33px;letter-spacing:-.045em;margin:0 0 8px}.login-card>.muted{margin-bottom:30px}.field{margin:14px 0}.field label{display:block;font-size:12px;font-weight:800;margin:0 0 7px;color:#55545f}.field input{width:100%;height:52px;border:1px solid var(--line);background:rgba(255,255,255,.9);border-radius:14px;padding:0 15px;outline:none;transition:.2s;box-shadow:0 4px 16px rgba(37,28,70,.02)}.field input:focus{border-color:#9b82ff;box-shadow:0 0 0 4px rgba(124,77,255,.09)}
     .primary-btn{width:100%;height:52px;border:0;border-radius:14px;background:#17171c;color:#fff;font-weight:850;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.2s;box-shadow:0 12px 24px rgba(21,21,27,.13)}.primary-btn:hover{transform:translateY(-1px);background:#24242c}.primary-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}.login-error{min-height:19px;color:#b42318;font-size:13px;margin-top:12px}.muted{color:var(--muted);font-size:13px;line-height:1.45}
+    .auth-switch{margin-top:16px;text-align:center;font-size:13px;color:var(--muted)}.auth-switch button{border:0;background:transparent;padding:0;color:#17171c;font-weight:850;cursor:pointer;text-decoration:underline;text-underline-offset:3px}.auth-success{min-height:19px;color:#087a4b;font-size:13px;margin-top:12px;line-height:1.45}
 
     /* APP */
     .app-shell{max-width:1460px;margin:0 auto;padding:22px;display:grid;grid-template-columns:236px minmax(0,1fr);gap:22px;min-height:100svh}
@@ -65,12 +66,14 @@
     </div>
     <div class="auth-form-wrap">
       <div class="login-card">
-        <h2>Entrar no painel</h2>
-        <div class="muted">Acesso privado ORB.</div>
+        <h2 id="authTitle">Entrar no painel</h2>
+        <div id="authSubtitle" class="muted">Acesso privado ORB.</div>
         <div class="field"><label for="email">E-MAIL</label><input id="email" type="email" placeholder="seu@email.com" autocomplete="username" /></div>
         <div class="field"><label for="password">SENHA</label><input id="password" type="password" placeholder="Sua senha" autocomplete="current-password" /></div>
         <button id="loginBtn" class="primary-btn"><span>Entrar</span><span>→</span></button>
         <div id="loginError" class="login-error"></div>
+        <div id="loginSuccess" class="auth-success"></div>
+        <div class="auth-switch"><span id="authSwitchText">Ainda não tem conta?</span> <button id="authSwitchBtn" type="button">Criar conta</button></div>
       </div>
     </div>
   </section>
@@ -127,7 +130,7 @@
   const $ = (id) => document.getElementById(id);
   const loginView = $('loginView'), appView = $('appView');
   const toastEl = $('toast');
-  let offers = [], latestPayload = null, onlyPending = false;
+  let offers = [], latestPayload = null, onlyPending = false, authMode = 'login';
 
   if (!C.supabaseUrl || !C.supabasePublishableKey) {
     $('loginError').textContent = 'Configure web/config.js antes de publicar.';
@@ -159,10 +162,50 @@
   function feedClass(f){ const s = String(f.status || '').toUpperCase(); return (s.includes('NOVO') || s.includes('OK') || s.includes('IGUAL')) ? 'ok' : (s.includes('ERRO') ? 'err' : ''); }
   function feedText(f){ const s = String(f.status || '').toUpperCase(); if(s.includes('ERRO')) return 'Erro no download'; if(s.includes('NOVO')) return 'Feed novo detectado'; if(s.includes('IGUAL')) return 'Sem mudança'; return s || 'Status desconhecido'; }
 
-  async function login(){
-    $('loginError').textContent = ''; $('loginBtn').disabled = true; $('loginBtn').firstElementChild.textContent = 'Entrando...';
-    const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
-    $('loginBtn').disabled = false; $('loginBtn').firstElementChild.textContent = 'Entrar';
+  function setAuthMode(mode){
+    authMode = mode;
+    $('loginError').textContent = '';
+    $('loginSuccess').textContent = '';
+    const creating = mode === 'signup';
+    $('authTitle').textContent = creating ? 'Criar sua conta' : 'Entrar no painel';
+    $('authSubtitle').textContent = creating ? 'Crie seu acesso ORB com e-mail e senha.' : 'Acesso privado ORB.';
+    $('loginBtn').firstElementChild.textContent = creating ? 'Criar conta' : 'Entrar';
+    $('authSwitchText').textContent = creating ? 'Já tem conta?' : 'Ainda não tem conta?';
+    $('authSwitchBtn').textContent = creating ? 'Entrar' : 'Criar conta';
+    $('password').setAttribute('autocomplete', creating ? 'new-password' : 'current-password');
+  }
+
+  async function authAction(){
+    const email = $('email').value.trim();
+    const password = $('password').value;
+    $('loginError').textContent = '';
+    $('loginSuccess').textContent = '';
+    if(!email || !password){ $('loginError').textContent = 'Preencha e-mail e senha.'; return; }
+    if(password.length < 6){ $('loginError').textContent = 'Use uma senha com pelo menos 6 caracteres.'; return; }
+
+    $('loginBtn').disabled = true;
+    $('loginBtn').firstElementChild.textContent = authMode === 'signup' ? 'Criando...' : 'Entrando...';
+
+    if(authMode === 'signup') {
+      const { data, error } = await sb.auth.signUp({ email, password });
+      $('loginBtn').disabled = false;
+      $('loginBtn').firstElementChild.textContent = 'Criar conta';
+      if(error){
+        $('loginError').textContent = error.message || 'Não foi possível criar a conta.';
+        return;
+      }
+      if(data?.session){
+        $('loginSuccess').textContent = 'Conta criada. Seu login funcionou; agora o acesso ao painel precisa estar autorizado.';
+      } else {
+        $('loginSuccess').textContent = 'Conta criada. Confirme o e-mail que o Supabase enviou e depois entre.';
+      }
+      setTimeout(() => setAuthMode('login'), 2600);
+      return;
+    }
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    $('loginBtn').disabled = false;
+    $('loginBtn').firstElementChild.textContent = 'Entrar';
     if(error){ $('loginError').textContent = 'E-mail ou senha inválidos.'; return; }
     await showApp();
   }
@@ -173,8 +216,12 @@
     const { data, error } = await sb.storage.from(C.panelBucket || 'orb-panel').download('latest.json');
     $('refreshBtn').disabled = false;
     if(error){
-      $('updated').innerHTML = '<span class="dot" style="background:#d34848"></span><span>Ainda não há dados publicados.</span>';
-      $('grid').innerHTML = '<div class="empty"><b>Nenhuma fila publicada ainda.</b>Assim que o Caçador enviar o primeiro latest.json, ela aparece aqui.</div>';
+      const msg = String(error.message || '').toLowerCase();
+      const denied = msg.includes('unauthorized') || msg.includes('not found') || msg.includes('permission') || msg.includes('403');
+      $('updated').innerHTML = `<span class="dot" style="background:#d34848"></span><span>${denied ? 'Conta sem acesso liberado.' : 'Ainda não há dados publicados.'}</span>`;
+      $('grid').innerHTML = denied
+        ? '<div class="empty"><b>Seu login existe, mas o painel ainda não foi liberado para essa conta.</b>Autorize o usuário no ORB e atualize a página.</div>'
+        : '<div class="empty"><b>Nenhuma fila publicada ainda.</b>Assim que o Caçador enviar o primeiro latest.json, ela aparece aqui.</div>';
       return;
     }
     try { latestPayload = JSON.parse(await data.text()); } catch { toast('Não foi possível ler os dados.'); return; }
@@ -225,7 +272,8 @@
     }));
   }
 
-  $('loginBtn').addEventListener('click', login); $('password').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+  $('loginBtn').addEventListener('click', authAction); $('password').addEventListener('keydown', e => { if(e.key === 'Enter') authAction(); });
+  $('authSwitchBtn').addEventListener('click', () => setAuthMode(authMode === 'login' ? 'signup' : 'login'));
   $('search').addEventListener('input', render); $('cat').addEventListener('change', render); $('pendingBtn').addEventListener('click', () => { onlyPending = !onlyPending; $('pendingBtn').classList.toggle('active',onlyPending); render(); });
   $('refreshBtn').addEventListener('click', loadData); $('sideRefresh').addEventListener('click', loadData);
   async function logout(){ await sb.auth.signOut(); location.reload(); }
