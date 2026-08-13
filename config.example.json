@@ -1,0 +1,20 @@
+{
+  "affiliate_id": "",
+  "sub_id": "orb-promocoes",
+  "agendamento": {"hora_diaria": "21:05"},
+  "feeds": [
+    {"nome": "Shopee Oficial BR - 2022", "url": ""},
+    {"nome": "Shopee Brasil - 2022", "url": ""}
+  ],
+  "filtros": {
+    "desconto_minimo": 20,
+    "nota_produto_minima": 4.7,
+    "nota_loja_minima": 4.7,
+    "preco_minimo": 10,
+    "preco_maximo": 500,
+    "dias_sem_repetir": 7,
+    "queda_para_repetir_pct": 8,
+    "max_por_categoria": 8
+  },
+  "fila": {"inicio": "08:00", "fim": "22:00", "intervalo_minutos": 20}
+}

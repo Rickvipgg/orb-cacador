@@ -1,0 +1,41 @@
+name: ORB Caçador
+
+on:
+  workflow_dispatch:
+  schedule:
+    # A cada hora no minuto :05. GitHub usa UTC, mas o minuto continua :05.
+    - cron: "5 * * * *"
+
+concurrency:
+  group: orb-cacador
+  cancel-in-progress: false
+
+jobs:
+  cacar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SHOPEE_AFFILIATE_ID: ${{ secrets.SHOPEE_AFFILIATE_ID }}
+      SHOPEE_SUB_ID: ${{ secrets.SHOPEE_SUB_ID }}
+      SHOPEE_FEED_1_URL: ${{ secrets.SHOPEE_FEED_1_URL }}
+      SHOPEE_FEED_2_URL: ${{ secrets.SHOPEE_FEED_2_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      ORB_STATE_BUCKET: orb-state
+      ORB_PANEL_BUCKET: orb-panel
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar Caçador ORB
+        run: python run_cloud.py

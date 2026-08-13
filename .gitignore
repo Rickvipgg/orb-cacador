@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+downloads/*.csv
+logs/*.log
+saida/*.csv
+saida/PAINEL.html
+saida/latest.json
+historico.sqlite
+feed_status.json
+.env
+web/config.js
