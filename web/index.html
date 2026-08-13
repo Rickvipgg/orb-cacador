@@ -209,7 +209,17 @@
     if(error){ $('loginError').textContent = 'E-mail ou senha inválidos.'; return; }
     await showApp();
   }
-  async function showApp(){ loginView.classList.add('hidden'); appView.classList.remove('hidden'); await loadData(); }
+  async function syncSubscription(){
+    try {
+      await sb.functions.invoke('orb-subscription', { body: { action: 'sync' } });
+    } catch (_) {}
+  }
+  async function showApp(){
+    loginView.classList.add('hidden');
+    appView.classList.remove('hidden');
+    await syncSubscription();
+    await loadData();
+  }
   async function loadData(){
     $('updated').innerHTML = '<span class="dot"></span><span>Atualizando...</span>';
     $('refreshBtn').disabled = true;
@@ -220,7 +230,7 @@
       const denied = msg.includes('unauthorized') || msg.includes('not found') || msg.includes('permission') || msg.includes('403');
       $('updated').innerHTML = `<span class="dot" style="background:#d34848"></span><span>${denied ? 'Conta sem acesso liberado.' : 'Ainda não há dados publicados.'}</span>`;
       $('grid').innerHTML = denied
-        ? '<div class="empty"><b>Seu login existe, mas o painel ainda não foi liberado para essa conta.</b>Autorize o usuário no ORB e atualize a página.</div>'
+        ? '<div class="empty"><b>Seu login existe, mas o acesso ainda não está ativo.</b><div style="margin:10px 0 16px">Assine a ORB para liberar o painel.</div><button class="action copy" style="max-width:280px" onclick="location.href='./checkout.html'">Assinar ORB — R$ 39,90/mês</button></div>'
         : '<div class="empty"><b>Nenhuma fila publicada ainda.</b>Assim que o Caçador enviar o primeiro latest.json, ela aparece aqui.</div>';
       return;
     }
