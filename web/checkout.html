@@ -62,7 +62,7 @@
 
     async function sync(){
       show('Verificando sua assinatura...','wait');
-      const {data,error}=await sb.functions.invoke('orb-subscription',{body:{action:'sync'}});
+      const {data,error}=await sb.functions.invoke('orb-create-subscription',{body:{action:'sync'}});
       if(error){show('Não consegui verificar a assinatura agora.','err');return false;}
       if(data?.active){show('Pagamento confirmado. Liberando seu painel...','ok');setTimeout(()=>location.href='./index.html',1200);return true;}
       if(data?.status==='pending'){show('A assinatura ainda está aguardando confirmação do Mercado Pago.','wait');}
@@ -78,7 +78,7 @@
       if(btn.dataset.mode==='login'){location.href='./index.html';return;}
       btn.disabled=true;btn.textContent='Abrindo Mercado Pago...';show('Criando sua assinatura segura...','wait');
       const returnUrl=new URL('./checkout.html?mp=return',location.href).href;
-      const {data,error}=await sb.functions.invoke('orb-subscription',{body:{action:'create',return_url:returnUrl}});
+      const {data,error}=await sb.functions.invoke('orb-create-subscription',{body:{action:'create',return_url:returnUrl}});
       if(error||!data){show('Não consegui iniciar a assinatura. Tente novamente.','err');btn.disabled=false;btn.textContent='Assinar com Mercado Pago →';return;}
       if(data.active){show('Sua assinatura já está ativa. Abrindo o painel...','ok');setTimeout(()=>location.href='./index.html',900);return;}
       if(data.init_point){location.href=data.init_point;return;}
