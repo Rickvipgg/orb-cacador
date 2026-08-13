@@ -8,4 +8,3 @@ saida/latest.json
 historico.sqlite
 feed_status.json
 .env
-web/config.js
