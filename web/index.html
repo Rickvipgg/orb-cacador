@@ -3,403 +3,235 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#f5f4f1" />
-  <title>ORB — Caçador de Ofertas</title>
+  <meta name="theme-color" content="#f6f5fb" />
+  <meta name="color-scheme" content="light" />
+  <title>ORB</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <style>
     :root{
-      --bg:#f5f4f1;
-      --panel:rgba(255,255,255,.78);
-      --panel-solid:#fff;
-      --ink:#101116;
-      --muted:#797b84;
-      --line:rgba(20,22,28,.085);
-      --dark:#101116;
-      --purple:#7657ff;
-      --violet:#9a5cff;
-      --blue:#4c7dff;
-      --cyan:#58b8ff;
-      --green:#16a56c;
-      --green-soft:#eaf8f1;
-      --red:#cb4b4b;
-      --shadow:0 18px 60px rgba(21,20,33,.07);
-      --blur:18px;
+      --bg:#f6f5fb;--surface:#fff;--surface-2:#f0eff6;--ink:#15151b;--muted:#777684;
+      --line:#e7e5ef;--purple:#7c4dff;--blue:#5267f7;--green:#16a36a;--orange:#ea6a32;
+      --danger:#d34848;--shadow:0 14px 46px rgba(27,22,54,.08);--radius:22px;
     }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+    button,input,select{font:inherit}.hidden{display:none!important}
+    .orb-mark{width:38px;height:38px;position:relative;display:inline-grid;place-items:center;flex:0 0 auto}
+    .orb-mark:before{content:"";width:27px;height:27px;border-radius:50%;background:#15151a;position:absolute;z-index:2}
+    .orb-mark:after{content:"";width:43px;height:13px;border-radius:50%;border:5px solid transparent;background:linear-gradient(90deg,var(--blue),#a855f7) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);mask-composite:exclude;transform:rotate(-13deg);position:absolute;z-index:3}
+    .brand{display:flex;align-items:center;gap:11px;font-weight:950;letter-spacing:-.04em;font-size:25px}.brand small{font-weight:700;color:var(--muted);font-size:13px;letter-spacing:0}
+    .glow{position:fixed;inset:auto;pointer-events:none;filter:blur(3px);opacity:.6;z-index:-1}.glow.a{width:460px;height:460px;left:-220px;top:-180px;background:radial-gradient(circle,rgba(124,77,255,.17),transparent 66%)}.glow.b{width:520px;height:520px;right:-250px;bottom:-250px;background:radial-gradient(circle,rgba(82,103,247,.14),transparent 66%)}
 
-    *{box-sizing:border-box}
-    html{background:var(--bg);scroll-behavior:smooth}
-    body{
-      margin:0;
-      min-height:100vh;
-      color:var(--ink);
-      background:
-        radial-gradient(circle at 8% -4%,rgba(122,87,255,.11),transparent 30%),
-        radial-gradient(circle at 94% 14%,rgba(76,125,255,.10),transparent 28%),
-        var(--bg);
-      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      overflow-x:hidden;
-    }
-    button,input,select{font:inherit}
-    button{cursor:pointer}
-    .hidden{display:none!important}
+    /* LOGIN */
+    .auth-shell{min-height:100svh;display:grid;grid-template-columns:1.08fr .92fr;padding:24px;gap:24px}
+    .auth-story{border-radius:30px;min-height:calc(100svh - 48px);padding:42px;position:relative;overflow:hidden;background:#15151b;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow)}
+    .auth-story:before{content:"";position:absolute;width:520px;height:520px;border-radius:50%;right:-170px;top:-170px;background:radial-gradient(circle,rgba(143,93,255,.5),rgba(77,93,255,.15) 42%,transparent 68%)}
+    .auth-story:after{content:"";position:absolute;left:-8%;right:-8%;bottom:20%;height:74px;border:17px solid transparent;background:linear-gradient(90deg,#5369f7,#a855f7) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);mask-composite:exclude;border-radius:50%;transform:rotate(-10deg);opacity:.9}
+    .auth-story .brand{position:relative;z-index:2}.auth-story .brand .orb-mark:before{background:#fff}.auth-story-copy{position:relative;z-index:2;max-width:580px}.eyebrow{font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.14em;color:#aeb5ff}.auth-story h1{font-size:clamp(42px,5.5vw,78px);line-height:.98;letter-spacing:-.065em;margin:12px 0 18px;max-width:720px}.auth-story p{font-size:17px;line-height:1.65;color:#bcbcc7;max-width:540px;margin:0}.auth-foot{position:relative;z-index:2;font-size:12px;color:#767681}
+    .auth-form-wrap{display:grid;place-items:center;padding:34px}.login-card{width:min(100%,430px)}.login-card h2{font-size:33px;letter-spacing:-.045em;margin:0 0 8px}.login-card>.muted{margin-bottom:30px}.field{margin:14px 0}.field label{display:block;font-size:12px;font-weight:800;margin:0 0 7px;color:#55545f}.field input{width:100%;height:52px;border:1px solid var(--line);background:rgba(255,255,255,.9);border-radius:14px;padding:0 15px;outline:none;transition:.2s;box-shadow:0 4px 16px rgba(37,28,70,.02)}.field input:focus{border-color:#9b82ff;box-shadow:0 0 0 4px rgba(124,77,255,.09)}
+    .primary-btn{width:100%;height:52px;border:0;border-radius:14px;background:#17171c;color:#fff;font-weight:850;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.2s;box-shadow:0 12px 24px rgba(21,21,27,.13)}.primary-btn:hover{transform:translateY(-1px);background:#24242c}.primary-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}.login-error{min-height:19px;color:#b42318;font-size:13px;margin-top:12px}.muted{color:var(--muted);font-size:13px;line-height:1.45}
 
-    /* Ambient ORB radar */
-    .ambient{
-      position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden;
+    /* APP */
+    .app-shell{max-width:1460px;margin:0 auto;padding:22px;display:grid;grid-template-columns:236px minmax(0,1fr);gap:22px;min-height:100svh}
+    .sidebar{position:sticky;top:22px;height:calc(100svh - 44px);background:#17171c;border-radius:28px;padding:22px 17px;color:#fff;display:flex;flex-direction:column;box-shadow:var(--shadow)}.sidebar .orb-mark:before{background:#fff}.sidebar .brand{padding:3px 5px 22px}.sidebar .nav-title{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:#65656f;margin:17px 10px 7px}.nav-item{border:0;background:transparent;color:#aaaab5;width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;text-align:left;font-size:13px;font-weight:720;cursor:pointer}.nav-item.active{background:#292830;color:#fff}.nav-dot{width:7px;height:7px;border-radius:99px;background:#73737d}.nav-item.active .nav-dot{background:linear-gradient(90deg,var(--blue),#a855f7);box-shadow:0 0 0 4px rgba(124,77,255,.12)}.side-status{margin-top:auto;background:#222229;border:1px solid #2d2d35;padding:13px;border-radius:16px}.status-line{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:760}.online-dot{width:8px;height:8px;border-radius:50%;background:#2ed47a;box-shadow:0 0 0 4px rgba(46,212,122,.1)}.side-status p{color:#81818b;font-size:11px;line-height:1.45;margin:8px 0 0}.side-logout{margin-top:10px;border:1px solid #32323a;background:transparent;color:#aaaab5;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:750;width:100%}
+    .main{min-width:0;padding-bottom:40px}.topbar{height:70px;display:flex;align-items:center;justify-content:space-between;gap:15px}.headline h1{font-size:27px;line-height:1;letter-spacing:-.045em;margin:0 0 7px}.updated{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}.updated .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}.top-actions{display:flex;gap:9px}.icon-btn{height:42px;border:1px solid var(--line);background:rgba(255,255,255,.82);border-radius:13px;padding:0 13px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#3a3943;cursor:pointer;transition:.18s}.icon-btn:hover{background:#fff;transform:translateY(-1px)}
+    .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:13px 0 18px}.metric{min-height:122px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:17px;position:relative;overflow:hidden}.metric.dark{background:#18181e;color:#fff;border-color:#18181e}.metric-icon{width:34px;height:34px;border-radius:11px;background:#f0eef9;display:grid;place-items:center;font-size:16px;margin-bottom:17px}.metric.dark .metric-icon{background:#28272e}.metric b{display:block;font-size:26px;letter-spacing:-.045em;line-height:1}.metric small{display:block;margin-top:6px;font-size:11px;color:#85838f}.metric.dark small{color:#85858e}.metric:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;right:-50px;top:-50px;background:radial-gradient(circle,rgba(124,77,255,.13),transparent 70%)}
+    .health-row{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;margin-bottom:15px}.health-card,.quick-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px}.section-label{font-weight:850;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.feeds{display:flex;gap:8px;overflow:auto;padding-bottom:2px}.feed{min-width:220px;border:1px solid var(--line);border-radius:14px;padding:11px 12px;background:#fbfaff}.feed-head{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:820}.feed-status-dot{width:7px;height:7px;border-radius:50%;background:#aaa}.feed.ok .feed-status-dot{background:var(--green)}.feed.err .feed-status-dot{background:var(--danger)}.feed .feed-meta{font-size:10px;color:var(--muted);line-height:1.45;margin-top:6px}.quick-card{background:linear-gradient(135deg,#1a1a20,#252331);color:#fff;position:relative;overflow:hidden}.quick-card:after{content:"";position:absolute;width:180px;height:180px;right:-90px;bottom:-105px;border-radius:50%;background:radial-gradient(circle,#7958f6,transparent 68%);opacity:.5}.quick-card p{font-size:11px;line-height:1.45;color:#9e9da8;margin:6px 0 0;max-width:290px;position:relative;z-index:2}.quick-card strong{position:relative;z-index:2;font-size:14px}
+    .toolbar{position:sticky;top:10px;z-index:7;background:rgba(246,245,251,.82);backdrop-filter:blur(18px);display:grid;grid-template-columns:minmax(220px,1fr) 240px auto;gap:9px;padding:10px 0;margin-bottom:10px}.search-wrap{position:relative}.search-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#8e8d98}.toolbar input,.toolbar select{width:100%;height:45px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.94);outline:none;color:#2a2931}.toolbar input{padding:0 14px 0 39px}.toolbar select{padding:0 12px}.toolbar input:focus,.toolbar select:focus{border-color:#a792ff;box-shadow:0 0 0 4px rgba(124,77,255,.07)}.filter-btn{height:45px;border:1px solid var(--line);background:#fff;border-radius:13px;padding:0 14px;cursor:pointer;font-size:12px;font-weight:790}.filter-btn.active{background:#19191f;color:#fff;border-color:#19191f}.result-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 2px 12px;color:var(--muted);font-size:11px}.result-row b{color:var(--ink)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.offer-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;display:grid;grid-template-columns:118px minmax(0,1fr);gap:15px;transition:.18s;min-height:230px}.offer-card:hover{transform:translateY(-2px);box-shadow:0 13px 34px rgba(32,25,61,.07);border-color:#ddd9eb}.offer-card.done{opacity:.48;filter:saturate(.55)}.offer-card.done:hover{transform:none;box-shadow:none}.product-image{width:118px;height:118px;border-radius:16px;background:#f1f0f5;overflow:hidden;display:grid;place-items:center;align-self:start;position:relative}.product-image img{width:100%;height:100%;object-fit:cover}.product-image .fallback{font-size:28px;color:#aaa}.time-badge{position:absolute;bottom:7px;left:7px;background:rgba(20,20,25,.84);backdrop-filter:blur(8px);color:#fff;border-radius:8px;padding:5px 7px;font-size:10px;font-weight:850}.offer-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.signal{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#f3edff;color:#7041d9;padding:6px 9px;font-size:10px;font-weight:900;letter-spacing:.02em}.score{font-size:11px;font-weight:900;background:#fff3e9;color:#ca5622;padding:6px 8px;border-radius:999px}.offer-title{font-size:15px;line-height:1.34;font-weight:820;margin:10px 0 8px;letter-spacing:-.013em}.meta{display:flex;gap:5px;flex-wrap:wrap}.pill{font-size:9px;color:#6d6b78;background:#f4f3f7;border-radius:999px;padding:5px 7px;white-space:nowrap}.pill.hot{background:#ecfbf3;color:#14784e}.price{display:flex;align-items:baseline;gap:8px;margin:13px 0 11px;flex-wrap:wrap}.old{text-decoration:line-through;color:#aaa8b1;font-size:11px}.now{font-size:23px;font-weight:930;letter-spacing:-.04em}.discount{background:#ddf8e8;color:#117548;border-radius:8px;padding:4px 6px;font-size:10px;font-weight:900}.actions{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:7px}.action{height:38px;border:0;border-radius:11px;font-size:10px;font-weight:900;cursor:pointer;transition:.15s}.copy{background:#19191f;color:#fff}.copy:hover{background:#2b2a32}.open{background:#f0eff5;color:#2c2b34}.posted{background:#f4f2fb;color:#6e45cb}.posted.is-done{background:#e7f7ef;color:#15774e}.empty{grid-column:1/-1;background:#fff;border:1px dashed #d8d5e3;border-radius:22px;padding:50px;text-align:center;color:var(--muted)}.empty b{display:block;color:var(--ink);margin-bottom:5px}
+    .skeleton{height:230px;border-radius:22px;background:linear-gradient(100deg,#eeedf3 20%,#f8f7fb 40%,#eeedf3 60%);background-size:200% 100%;animation:shimmer 1.2s linear infinite}@keyframes shimmer{to{background-position-x:-200%}}
+    .toast{position:fixed;right:22px;bottom:22px;background:#17171c;color:#fff;border-radius:14px;padding:12px 15px;font-size:12px;font-weight:760;box-shadow:0 16px 46px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;z-index:30}.toast.show{opacity:1;transform:none}
+    .mobile-head{display:none}
+    @media(max-width:1050px){.app-shell{grid-template-columns:190px minmax(0,1fr)}.health-row{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.offer-card{min-height:216px}}
+    @media(max-width:760px){
+      .auth-shell{display:block;padding:0}.auth-story{display:none}.auth-form-wrap{min-height:100svh;padding:25px}.login-card:before{content:"";display:block;width:72px;height:72px;margin-bottom:28px;background:url('./favicon.svg') center/contain no-repeat}
+      .app-shell{display:block;padding:0 12px 30px}.sidebar{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;padding:15px 2px 4px}.mobile-head .brand{font-size:22px}.mobile-head .orb-mark{transform:scale(.85);transform-origin:left center}.mobile-logout{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 10px;font-weight:800;font-size:11px}.topbar{height:auto;padding:12px 2px 6px}.headline h1{font-size:24px}.top-actions .icon-btn span.label{display:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{min-height:108px;padding:14px}.metric b{font-size:23px}.metric-icon{margin-bottom:13px}.health-row{display:block}.quick-card{display:none}.health-card{padding:13px;margin-bottom:8px}.feeds{margin-right:-13px}.toolbar{top:0;grid-template-columns:1fr auto;padding:8px 0}.toolbar select{grid-column:1/2}.search-wrap{grid-column:1/3}.filter-btn{grid-column:2/3;grid-row:2}.grid{gap:9px}.offer-card{grid-template-columns:86px minmax(0,1fr);gap:11px;padding:11px;border-radius:18px;min-height:0}.product-image{width:86px;height:86px;border-radius:13px}.offer-title{font-size:13px;margin:8px 0 7px}.now{font-size:20px}.actions{grid-column:1/-1;grid-template-columns:1.25fr .8fr .8fr}.action{height:40px}.meta .pill:nth-child(n+4){display:none}.toast{left:12px;right:12px;bottom:14px;text-align:center}.result-row{margin-top:3px}
     }
-    .ambient:before,.ambient:after{
-      content:"";position:absolute;border-radius:50%;filter:blur(84px);opacity:.13;
-    }
-    .ambient:before{width:420px;height:420px;left:-180px;top:12%;background:var(--violet)}
-    .ambient:after{width:460px;height:460px;right:-210px;bottom:3%;background:var(--blue)}
-    .radar-bg{
-      position:absolute;
-      width:min(760px,72vw);aspect-ratio:1;
-      right:-220px;top:175px;border-radius:50%;opacity:.065;
-      background:
-        repeating-radial-gradient(circle at center,transparent 0 74px,rgba(92,76,190,.8) 75px 76px),
-        linear-gradient(90deg,transparent 49.9%,rgba(92,76,190,.75) 50%,transparent 50.1%),
-        linear-gradient(0deg,transparent 49.9%,rgba(92,76,190,.75) 50%,transparent 50.1%);
-    }
-    .radar-bg:after{
-      content:"";position:absolute;inset:0;border-radius:50%;
-      background:conic-gradient(from 0deg,rgba(118,87,255,.75),rgba(118,87,255,0) 22%,transparent 100%);
-      animation:radarSpin 14s linear infinite;
-    }
-    .radar-bg:before{
-      content:"";position:absolute;left:60%;top:26%;width:7px;height:7px;border-radius:50%;background:var(--purple);
-      box-shadow:-116px 174px 0 rgba(76,125,255,.8),-255px 80px 0 rgba(154,92,255,.6),54px 244px 0 rgba(118,87,255,.55);
-      animation:blip 3.8s ease-in-out infinite;
-    }
-    @keyframes radarSpin{to{transform:rotate(360deg)}}
-    @keyframes blip{0%,100%{opacity:.3;transform:scale(.75)}50%{opacity:1;transform:scale(1.3)}}
-    @keyframes livePulse{0%,100%{box-shadow:0 0 0 4px rgba(22,165,108,.11)}50%{box-shadow:0 0 0 8px rgba(22,165,108,0)}}
-    @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-    @keyframes orbitFloat{0%,100%{transform:translateY(0) rotate(-9deg)}50%{transform:translateY(-5px) rotate(-7deg)}}
-
-    /* ORB mark */
-    .orb-mark{position:relative;display:grid;place-items:center;flex:none}
-    .orb-mark .planet{border-radius:50%;background:linear-gradient(145deg,#282a30,#08090b);position:relative;box-shadow:inset -10px -10px 20px rgba(0,0,0,.32)}
-    .orb-mark .planet:after{content:"";position:absolute;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--blue));transform:rotate(-12deg);box-shadow:0 5px 22px rgba(118,87,255,.22)}
-    .orb-mark.big{width:74px;height:74px}.orb-mark.big .planet{width:46px;height:46px}.orb-mark.big .planet:after{width:64px;height:10px;left:-9px;top:18px}
-    .orb-mark.small{width:42px;height:42px}.orb-mark.small .planet{width:28px;height:28px}.orb-mark.small .planet:after{width:39px;height:6px;left:-6px;top:11px}
-    .orb-mark.big:before,.orb-mark.big:after{content:"";position:absolute;border:1px solid rgba(20,22,28,.16);border-radius:50%}
-    .orb-mark.big:before{inset:0}.orb-mark.big:after{inset:10px}
-
-    /* Login */
-    .login-shell{min-height:100svh;display:grid;place-items:center;padding:24px;position:relative}
-    .login-card{
-      width:min(430px,100%);padding:32px;border:1px solid var(--line);border-radius:28px;
-      background:rgba(255,255,255,.70);backdrop-filter:blur(22px);box-shadow:var(--shadow);position:relative;overflow:hidden;
-      animation:rise .55s ease both;
-    }
-    .login-card:before{content:"";position:absolute;right:-100px;top:-110px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(118,87,255,.12);box-shadow:0 0 0 36px rgba(118,87,255,.04),0 0 0 72px rgba(76,125,255,.025)}
-    .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:850;margin:20px 0 8px}
-    .login-card h1{font-size:34px;line-height:1.06;margin:0 0 10px;letter-spacing:-.045em}.login-card h1 span{font-weight:450;color:#676970}
-    .sub{color:var(--muted);margin:0 0 25px;line-height:1.55;font-size:14px}
-    .field{margin-top:12px}.field label{display:block;font-size:11px;font-weight:850;color:#5d6067;margin:0 0 7px;text-transform:uppercase;letter-spacing:.07em}
-    .field input{width:100%;padding:14px;border:1px solid #dddcd7;border-radius:14px;background:rgba(255,255,255,.8);outline:none;transition:.18s}
-    .field input:focus{border-color:#a99cf6;box-shadow:0 0 0 4px rgba(118,87,255,.08)}
-    .primary{width:100%;border:0;border-radius:14px;background:var(--dark);color:#fff;padding:14px 16px;font-weight:900;margin-top:16px;transition:.18s}.primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(16,17,22,.13)}
-    .login-links{display:flex;justify-content:space-between;gap:12px;margin-top:13px}.ghost-link{border:0;background:none;padding:0;color:#6a6d75;font-size:12px;text-decoration:underline;text-underline-offset:3px}
-    .error,.notice{font-size:12px;margin-top:12px;line-height:1.45}.error{color:#b52e2e}.notice{color:#3b7058}
-
-    /* Billing gate */
-    .billing-shell{min-height:100svh;display:grid;place-items:center;padding:24px;position:relative}
-    .billing-card{width:min(540px,100%);padding:30px;border:1px solid var(--line);border-radius:28px;background:rgba(255,255,255,.78);backdrop-filter:blur(22px);box-shadow:var(--shadow);animation:rise .45s ease both}
-    .billing-card h2{font-size:31px;line-height:1.08;letter-spacing:-.04em;margin:0 0 9px}.billing-card p{color:var(--muted);font-size:13px;line-height:1.55;margin:0}
-    .price-box{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:20px 0 14px;padding:18px;border:1px solid rgba(118,87,255,.12);border-radius:18px;background:linear-gradient(135deg,#f8f6ff,#f5f8ff)}
-    .price-box .plan{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#6550c5}.price-box .price-big{font-size:35px;font-weight:950;letter-spacing:-.045em;margin-top:3px}.price-box .month{font-size:11px;color:#7d7f87;margin-bottom:5px}.secure-note{padding:11px 12px;border-radius:13px;background:#f7f6f2;border:1px solid var(--line);font-size:11px;color:#686a71;line-height:1.5;margin-top:10px}
-    .billing-actions{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center}.billing-actions .primary{margin-top:14px}.billing-actions .secondary-btn{white-space:nowrap}
-    /* Mandatory affiliate onboarding */
-    .onboarding-shell{min-height:100svh;display:grid;place-items:center;padding:24px;position:relative}
-    .onboarding-card{width:min(520px,100%);padding:30px;border:1px solid var(--line);border-radius:28px;background:rgba(255,255,255,.78);backdrop-filter:blur(22px);box-shadow:var(--shadow);animation:rise .45s ease both}
-    .step-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#f0edff;color:#5d46c9;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
-    .onboarding-card h2{font-size:31px;line-height:1.08;letter-spacing:-.04em;margin:0 0 9px}.onboarding-card p{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 18px}
-    .required-note{margin-top:11px;padding:11px 12px;border-radius:13px;background:#f7f6f2;border:1px solid var(--line);font-size:11px;color:#686a71;line-height:1.5}
-    .onboarding-actions{display:flex;gap:9px;align-items:center}.onboarding-actions .primary{margin-top:14px}.secondary-btn{border:1px solid var(--line);background:#fff;color:#565960;border-radius:14px;padding:14px 15px;font-weight:850;margin-top:14px}
-    .settings-btn{border:1px solid var(--line);background:rgba(255,255,255,.58);border-radius:12px;padding:9px 12px;font-size:11px;font-weight:850;color:#666970;backdrop-filter:blur(10px);transition:.18s}.settings-btn:hover{background:#fff}
-
-    /* App shell */
-    .app{max-width:1240px;margin:auto;padding:22px 20px 56px}
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px;padding:10px 2px;
-    }
-    .brand-wrap{display:flex;align-items:center;gap:12px}.brand-title{font-size:20px;font-weight:950;letter-spacing:-.025em}.brand-title span{font-weight:480;color:#797b82}.brand-sub{font-size:11px;color:var(--muted);margin-top:2px}
-    .status-wrap{display:flex;align-items:center;gap:9px}.status{display:flex;align-items:center;gap:8px;border:1px solid rgba(22,165,108,.13);background:rgba(244,251,247,.82);padding:9px 11px;border-radius:999px;font-size:11px;font-weight:850;color:#315f49;backdrop-filter:blur(10px)}
-    .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:livePulse 2.1s infinite}.logout{border:1px solid var(--line);background:rgba(255,255,255,.58);border-radius:12px;padding:9px 12px;font-size:11px;font-weight:850;color:#666970;backdrop-filter:blur(10px);transition:.18s}.logout:hover{background:#fff}
-
-    /* Hero */
-    .hunt-hero{
-      background:linear-gradient(135deg,#111218 0%,#161722 58%,#11131a 100%);color:#fff;border-radius:25px;padding:22px 23px;
-      display:grid;grid-template-columns:1.25fr .75fr;gap:18px;position:relative;overflow:hidden;margin-bottom:12px;box-shadow:0 20px 55px rgba(16,17,22,.13);
-      animation:rise .5s ease both;
-    }
-    .hunt-hero:before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;border:1px solid rgba(255,255,255,.075);right:-88px;top:-132px;box-shadow:0 0 0 47px rgba(255,255,255,.023),0 0 0 94px rgba(255,255,255,.015)}
-    .hunt-hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(118,87,255,.16),transparent 66%);right:72px;bottom:-160px;filter:blur(5px)}
-    .hunt-content{position:relative;z-index:2}
-    .hunt-label{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#a9acb6;font-weight:850}.target-icon{width:19px;height:19px;border:1px solid #6a6d78;border-radius:50%;position:relative}.target-icon:before,.target-icon:after{content:"";position:absolute;background:#6a6d78}.target-icon:before{width:27px;height:1px;left:-5px;top:8px}.target-icon:after{height:27px;width:1px;left:8px;top:-5px}
-    .hunt-hero h2{font-size:32px;margin:11px 0 7px;letter-spacing:-.045em;max-width:660px}.hunt-hero h2 em{font-style:normal;background:linear-gradient(90deg,#c087ff,#6f96ff);-webkit-background-clip:text;background-clip:text;color:transparent}.hunt-meta{color:#a9acb5;font-size:12px}.hunt-meta b{color:#fff}
-    .next-box{align-self:center;justify-self:end;min-width:220px;border-left:1px solid rgba(255,255,255,.1);padding-left:22px;position:relative;z-index:2}.next-box small{display:block;color:#8f929c;font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:850}.next-time{font-size:30px;font-weight:950;margin-top:5px;letter-spacing:-.03em}.next-box span{font-size:11px;color:#a7aab3}
-    .mini-orbit{position:absolute;right:154px;top:21px;width:68px;height:68px;animation:orbitFloat 5s ease-in-out infinite;opacity:.92}.mini-orbit .core{width:40px;height:40px;border-radius:50%;background:#090a0d;position:absolute;left:14px;top:14px}.mini-orbit .core:after{content:"";position:absolute;width:58px;height:8px;left:-9px;top:16px;background:linear-gradient(90deg,#9b5cff,#4c7dff);border-radius:999px;transform:rotate(-13deg)}
-
-    /* Metrics */
-    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.metric{background:var(--panel);backdrop-filter:blur(var(--blur));border:1px solid var(--line);border-radius:18px;padding:15px 16px;transition:.2s;animation:rise .55s ease both}.metric:nth-child(2){animation-delay:.04s}.metric:nth-child(3){animation-delay:.08s}.metric:nth-child(4){animation-delay:.12s}.metric:hover{transform:translateY(-2px);background:#fff;border-color:rgba(118,87,255,.17);box-shadow:0 12px 32px rgba(27,23,51,.06)}
-    .metric .k{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:850}.metric .v{font-size:26px;font-weight:950;letter-spacing:-.035em;margin-top:5px}.metric .hint{font-size:10px;color:#a0a2a8;margin-top:2px}
-
-    /* Feeds */
-    .feeds{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}.feed{background:var(--panel);backdrop-filter:blur(var(--blur));border:1px solid var(--line);border-radius:16px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:.18s}.feed:hover{background:#fff}.feed-left{min-width:0}.feed-name{font-size:12px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feed-meta{font-size:10px;color:var(--muted);margin-top:3px}.feed-badge{flex:none;font-size:9px;border-radius:999px;padding:6px 8px;font-weight:900;letter-spacing:.05em}.ok{background:var(--green-soft);color:#24754f}.bad{background:#fdeaea;color:#a43a3a}.neutral{background:#f1f1ee;color:#686b71}
-
-    /* Toolbar + offers */
-    .section-row{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:22px 0 10px}.section-row h3{margin:0;font-size:16px;letter-spacing:-.02em}.section-row span{font-size:11px;color:var(--muted)}
-    .toolbar{display:grid;grid-template-columns:1fr 230px;gap:10px;margin-bottom:12px}.toolbar input,.toolbar select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.72);backdrop-filter:blur(14px);outline:none;transition:.18s}.toolbar input:focus,.toolbar select:focus{border-color:#aaa0ef;box-shadow:0 0 0 4px rgba(118,87,255,.07);background:#fff}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:var(--panel);backdrop-filter:blur(var(--blur));border:1px solid var(--line);border-radius:19px;padding:16px;transition:.2s;position:relative;overflow:hidden;animation:rise .4s ease both}.card:before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--purple),var(--blue),transparent);opacity:0;transition:.2s}.card:hover{border-color:rgba(118,87,255,.17);transform:translateY(-2px);box-shadow:0 14px 38px rgba(28,24,50,.07);background:#fff}.card:hover:before{opacity:.8}
-    .row{display:flex;justify-content:space-between;align-items:center;gap:12px}.time{font-size:11px;color:#777a82;font-weight:850;display:flex;align-items:center;gap:6px}.time:before{content:"";width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));box-shadow:0 0 0 4px rgba(118,87,255,.07)}.score{font-size:10px;background:linear-gradient(135deg,#f0ecff,#edf2ff);color:#6244d2;border:1px solid rgba(118,87,255,.08);border-radius:999px;padding:6px 9px;font-weight:950}.title{font-weight:880;margin:13px 0 10px;line-height:1.35;letter-spacing:-.012em}.store{font-size:10px;color:#8a8c92;margin-top:-4px;margin-bottom:10px}.pills{display:flex;gap:6px;flex-wrap:wrap}.pill{background:rgba(242,242,239,.9);border:1px solid rgba(20,22,28,.04);border-radius:999px;padding:5px 8px;font-size:9px;color:#61646b}.price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:15px 0}.old{text-decoration:line-through;color:#a2a4a8;font-size:11px}.now{font-size:25px;font-weight:950;letter-spacing:-.035em}.disc{background:#e6f8ef;color:#17704b;padding:5px 7px;border-radius:8px;font-size:10px;font-weight:950}.drop{font-size:9px;color:#6d6f76}
-    .actions{display:grid;grid-template-columns:1.25fr 1fr;gap:8px}.actions button{border:0;border-radius:11px;padding:11px 10px;font-size:10px;font-weight:950;transition:.18s}.copy{background:var(--dark);color:#fff}.copy:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(16,17,22,.13)}.open{background:#eeeeea;color:#202226}.open:hover{background:#e7e7e2}
-    .empty{grid-column:1/-1;border:1px dashed #d8d8d3;border-radius:18px;padding:42px;text-align:center;color:var(--muted);font-size:12px;background:rgba(255,255,255,.35)}
-    .toast{position:fixed;right:18px;bottom:18px;background:#111216;color:#fff;border-radius:12px;padding:11px 14px;font-size:11px;font-weight:800;box-shadow:0 12px 35px rgba(0,0,0,.17);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s;z-index:99}.toast.show{opacity:1;transform:none}
-
-    @media(max-width:850px){
-      .app{padding:16px 12px 40px}.topbar{align-items:flex-start}.status-wrap{gap:6px}.brand-sub{display:none}
-      .hunt-hero{grid-template-columns:1fr;padding:19px}.hunt-hero h2{font-size:27px}.next-box{justify-self:start;border-left:0;border-top:1px solid rgba(255,255,255,.1);padding:14px 0 0;width:100%}.mini-orbit{right:15px;top:14px;opacity:.45}
-      .metrics{grid-template-columns:repeat(2,1fr)}.feeds{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.radar-bg{width:600px;right:-390px;top:320px}.status{padding:8px 9px}.logout{padding:8px 9px}
-    }
-    @media(max-width:480px){
-      .login-card{padding:25px 20px}.login-card h1{font-size:29px}.brand-title{font-size:18px}.orb-mark.small{width:37px;height:37px}.orb-mark.small .planet{width:25px;height:25px}.orb-mark.small .planet:after{width:35px;height:6px;left:-5px;top:10px}.metrics{gap:8px}.metric{padding:13px}.metric .v{font-size:23px}.hunt-hero h2{font-size:24px}.actions{grid-template-columns:1fr 1fr}.copy{grid-column:1/-1}.section-row{align-items:center}.section-row span{max-width:45%;text-align:right}
-    }
-    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
   </style>
 </head>
 <body>
-  <div class="ambient" aria-hidden="true"><div class="radar-bg"></div></div>
+  <div class="glow a"></div><div class="glow b"></div>
 
-  <section id="loginView" class="login-shell">
-    <div class="login-card">
-      <div class="orb-mark big" aria-hidden="true"><div class="planet"></div></div>
-      <div class="eyebrow">ORB • acesso privado</div>
-      <h1>Central de <span>Caça.</span></h1>
-      <p class="sub">Seu painel privado para acompanhar as melhores oportunidades encontradas pelo Caçador ORB.</p>
-      <div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seu@email.com" /></div>
-      <div class="field"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="••••••••" /></div>
-      <button id="loginBtn" class="primary">ENTRAR NO PAINEL</button>
-      <div class="login-links"><button id="signupBtn" class="ghost-link">Criar acesso</button><span style="font-size:11px;color:#9a9ca2">ORB Promoções</span></div>
-      <div id="loginError" class="error"></div><div id="loginNotice" class="notice"></div>
+  <section id="loginView" class="auth-shell">
+    <div class="auth-story">
+      <div class="brand"><span class="orb-mark"></span> ORB</div>
+      <div class="auth-story-copy">
+        <div class="eyebrow">Radar de oportunidades</div>
+        <h1>Oferta boa não espera.</h1>
+        <p>Seu painel privado para encontrar, organizar e publicar as melhores oportunidades sem perder tempo no meio de milhares de produtos.</p>
+      </div>
+      <div class="auth-foot">ORB • As melhores ofertas entram em órbita aqui.</div>
+    </div>
+    <div class="auth-form-wrap">
+      <div class="login-card">
+        <h2>Entrar no painel</h2>
+        <div class="muted">Acesso privado ORB.</div>
+        <div class="field"><label for="email">E-MAIL</label><input id="email" type="email" placeholder="seu@email.com" autocomplete="username" /></div>
+        <div class="field"><label for="password">SENHA</label><input id="password" type="password" placeholder="Sua senha" autocomplete="current-password" /></div>
+        <button id="loginBtn" class="primary-btn"><span>Entrar</span><span>→</span></button>
+        <div id="loginError" class="login-error"></div>
+      </div>
     </div>
   </section>
 
-  <section id="billingView" class="billing-shell hidden">
-    <div class="billing-card">
-      <div class="orb-mark big" aria-hidden="true"><div class="planet"></div></div>
-      <div class="step-chip">Assinatura necessária</div>
-      <h2>Ative sua ORB.</h2>
-      <p>Sua conta já existe. O painel só é liberado quando a assinatura estiver ativa.</p>
-      <div class="price-box">
-        <div><div class="plan">ORB Beta</div><div class="price-big">R$ 39,90</div></div>
-        <div class="month">por mês<br>cancele quando quiser</div>
+  <main id="appView" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand"><span class="orb-mark"></span> ORB</div>
+      <div class="nav-title">Painel</div>
+      <button class="nav-item active"><span class="nav-dot"></span> Ofertas</button>
+      <button class="nav-item" id="sideRefresh"><span class="nav-dot"></span> Atualizar dados</button>
+      <div class="nav-title">Atalhos</div>
+      <button class="nav-item" onclick="location.href='./checkout.html'"><span class="nav-dot"></span> Checkout</button>
+      <div class="side-status">
+        <div class="status-line"><span class="online-dot"></span> Caçador online</div>
+        <p id="sideStatusText">Aguardando última atualização.</p>
       </div>
-      <div class="billing-actions"><button id="subscribeBtn" class="primary">ASSINAR POR R$ 39,90</button><button id="billingLogoutBtn" class="secondary-btn">Sair</button></div>
-      <button id="syncBillingBtn" class="ghost-link" style="margin-top:13px">Já paguei — verificar assinatura</button>
-      <div class="secure-note"><b>Acesso protegido.</b> Voltar do checkout não libera o painel sozinho. A ORB consulta o status da assinatura no backend antes de continuar.</div>
-      <div id="billingError" class="error"></div><div id="billingNotice" class="notice"></div>
-    </div>
-  </section>
+      <button id="logoutBtn" class="side-logout">Sair da conta</button>
+    </aside>
 
-  <section id="onboardingView" class="onboarding-shell hidden">
-    <div class="onboarding-card">
-      <div class="orb-mark big" aria-hidden="true"><div class="planet"></div></div>
-      <div class="step-chip">Configuração obrigatória</div>
-      <h2>Conecte seu ID de afiliado.</h2>
-      <p>A ORB usa o seu ID para montar os links das ofertas no seu próprio painel. Sem isso, o sistema não libera a central de caça.</p>
-      <div class="field"><label for="affiliateId">ID de afiliado Shopee</label><input id="affiliateId" type="text" autocomplete="off" placeholder="Cole seu ID de afiliado" /></div>
-      <div class="field"><label for="subId">Sub ID da ORB</label><input id="subId" type="text" autocomplete="off" placeholder="Ex.: orb-meugrupo" /></div>
-      <div class="required-note"><b>ID de afiliado é obrigatório.</b> O Sub ID já vem criado automaticamente e serve para separar seus resultados/campanhas. Você pode alterá-lo.</div>
-      <div class="onboarding-actions"><button id="saveAffiliateBtn" class="primary">SALVAR E LIBERAR PAINEL</button><button id="onboardingLogoutBtn" class="secondary-btn">Sair</button></div>
-      <div id="onboardingError" class="error"></div><div id="onboardingNotice" class="notice"></div>
-    </div>
-  </section>
+    <section class="main">
+      <div class="mobile-head"><div class="brand"><span class="orb-mark"></span> ORB</div><button id="mobileLogout" class="mobile-logout">Sair</button></div>
+      <header class="topbar">
+        <div class="headline"><h1>Bom dia 👋</h1><div id="updated" class="updated"><span class="dot"></span><span>Carregando dados...</span></div></div>
+        <div class="top-actions"><button id="refreshBtn" class="icon-btn"><span>↻</span><span class="label">Atualizar</span></button></div>
+      </header>
 
-  <main id="appView" class="app hidden">
-    <div class="topbar">
-      <div class="brand-wrap">
-        <div class="orb-mark small" aria-hidden="true"><div class="planet"></div></div>
-        <div><div class="brand-title">ORB <span>Caçador</span></div><div class="brand-sub">Central privada de oportunidades</div></div>
+      <section class="metrics">
+        <div class="metric dark"><div class="metric-icon">◎</div><b id="mRows">—</b><small>linhas analisadas</small></div>
+        <div class="metric"><div class="metric-icon">◇</div><b id="mUnique">—</b><small>produtos únicos</small></div>
+        <div class="metric"><div class="metric-icon">⌁</div><b id="mCandidates">—</b><small>candidatos encontrados</small></div>
+        <div class="metric"><div class="metric-icon">↗</div><b id="mQueue">—</b><small>ofertas na fila</small></div>
+      </section>
+
+      <section class="health-row">
+        <div class="health-card"><div class="section-label"><span>Saúde dos feeds</span><span id="feedSummary" class="muted">—</span></div><div id="feeds" class="feeds"></div></div>
+        <div class="quick-card"><strong>ORB está caçando.</strong><p>O painel recebe a fila processada pelo Caçador. Cupom só aparece quando vier de uma fonte real — nada inventado.</p></div>
+      </section>
+
+      <div class="toolbar">
+        <div class="search-wrap"><span>⌕</span><input id="search" placeholder="Buscar produto..." /></div>
+        <select id="cat"><option value="">Todas as categorias</option></select>
+        <button id="pendingBtn" class="filter-btn">Só não postados</button>
       </div>
-      <div class="status-wrap"><div class="status"><span class="dot"></span><span><b>Sistema ativo</b> · <span id="clock">--:--</span></span></div><button id="affiliateSettingsBtn" class="settings-btn">Afiliado</button><button id="logoutBtn" class="logout">Sair</button></div>
-    </div>
-
-    <section class="hunt-hero">
-      <div class="hunt-content">
-        <div class="hunt-label"><span class="target-icon"></span> Radar de oportunidades</div>
-        <h2>O caçador está <em>na pista.</em></h2>
-        <div id="updated" class="hunt-meta">Carregando última varredura...</div>
-      </div>
-      <div class="mini-orbit" aria-hidden="true"><div class="core"></div></div>
-      <div class="next-box"><small>Próxima caçada</small><div id="nextHunt" class="next-time">--:05</div><span>execução automática na nuvem</span></div>
+      <div class="result-row"><span><b id="resultCount">0</b> ofertas encontradas</span><span id="postedCount">0 postadas</span></div>
+      <section id="grid" class="grid"><div class="skeleton"></div><div class="skeleton"></div></section>
     </section>
-
-    <section class="metrics">
-      <div class="metric"><div class="k">Rastreados</div><div id="mRows" class="v">—</div><div class="hint">linhas analisadas</div></div>
-      <div class="metric"><div class="k">Alvos únicos</div><div id="mUnique" class="v">—</div><div class="hint">produtos distintos</div></div>
-      <div class="metric"><div class="k">Na mira</div><div id="mCandidates" class="v">—</div><div class="hint">candidatos filtrados</div></div>
-      <div class="metric"><div class="k">Ofertas na fila</div><div id="mQueue" class="v">—</div><div class="hint">prontas para analisar</div></div>
-    </section>
-
-    <section id="feeds" class="feeds"></section>
-
-    <div class="section-row"><h3>Alvos selecionados</h3><span id="resultCount">0 ofertas</span></div>
-    <div class="toolbar"><input id="search" placeholder="Buscar produto, loja ou palavra..." /><select id="cat"><option value="">Todas as categorias</option></select></div>
-    <section id="grid" class="grid"></section>
   </main>
+
   <div id="toast" class="toast">Copiado.</div>
 
 <script>
-const C=window.ORB_CONFIG||{};
-const sb=supabase.createClient(C.supabaseUrl,C.supabasePublishableKey);
-const $=id=>document.getElementById(id);
-const loginView=$('loginView'),billingView=$('billingView'),onboardingView=$('onboardingView'),appView=$('appView');
-let offers=[];
-let orbProfile=null;
-let orbAccount=null;
-let orbIsAdmin=false;
-const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const esc=s=>String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
-const fmt=n=>Number(n||0).toLocaleString('pt-BR');
+(() => {
+  const C = window.ORB_CONFIG || {};
+  const $ = (id) => document.getElementById(id);
+  const loginView = $('loginView'), appView = $('appView');
+  const toastEl = $('toast');
+  let offers = [], latestPayload = null, onlyPending = false;
 
-function tickClock(){const d=new Date();$('clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
-setInterval(tickClock,1000);tickClock();
-function toast(msg='Copiado para a área de transferência.'){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),1800)}
-function calcNextHunt(){const now=new Date();let n=new Date(now);n.setSeconds(0,0);n.setMinutes(5);if(n<=now)n.setHours(n.getHours()+1);$('nextHunt').textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
-function setAuthMsg(err='',notice=''){$('loginError').textContent=err;$('loginNotice').textContent=notice}
-function showOnly(view){loginView.classList.add('hidden');billingView.classList.add('hidden');onboardingView.classList.add('hidden');appView.classList.add('hidden');view.classList.remove('hidden');}
-function hasAffiliate(){return !!String(orbProfile?.affiliate_id||'').trim();}
-function hasAccess(){return orbIsAdmin || ['trialing','active'].includes(String(orbAccount?.status||''));}
-async function loadCustomer(){
-  const {data:{user}}=await sb.auth.getUser();
-  if(!user)return false;
-  const [{data:profile,error:pe},{data:account,error:ae},{data:isAdmin}]=await Promise.all([
-    sb.from('orb_profiles').select('user_id,affiliate_id,sub_id').eq('user_id',user.id).single(),
-    sb.from('orb_accounts').select('status,plan,current_period_end,provider_status').eq('user_id',user.id).single(),
-    sb.rpc('is_orb_admin')
-  ]);
-  if(pe||ae){setAuthMsg('Não consegui carregar sua conta ORB. Tente sair e entrar novamente.');return false;}
-  orbProfile=profile;orbAccount=account;orbIsAdmin=!!isAdmin;return true;
-}
-async function routeAuthenticated(){
-  setAuthMsg();
-  if(!(await loadCustomer())){showOnly(loginView);return;}
-  if(!hasAccess()){
-    $('billingError').textContent='';
-    $('billingNotice').textContent=orbAccount?.status==='past_due'?'Sua cobrança está pendente. Regularize a assinatura para voltar ao painel.':orbAccount?.status==='canceled'?'Sua assinatura está cancelada. Assine novamente para reativar o acesso.':'Conta criada. Ative a assinatura para liberar o ORB.';
-    showOnly(billingView);return;
+  if (!C.supabaseUrl || !C.supabasePublishableKey) {
+    $('loginError').textContent = 'Configure web/config.js antes de publicar.';
+    $('loginBtn').disabled = true;
+    return;
   }
-  if(!hasAffiliate()){
-    $('affiliateId').value='';$('subId').value=orbProfile?.sub_id||'';
-    $('onboardingError').textContent='';$('onboardingNotice').textContent='';showOnly(onboardingView);return;
+
+  const sb = supabase.createClient(C.supabaseUrl, C.supabasePublishableKey);
+  const money = (v) => Number(v || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  const esc = (s) => String(s ?? '').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  const postedKey = 'orb-posted-v1';
+  const readPosted = () => { try { return new Set(JSON.parse(localStorage.getItem(postedKey) || '[]')); } catch { return new Set(); } };
+  const savePosted = (set) => localStorage.setItem(postedKey, JSON.stringify([...set]));
+  const fmt = (n) => Number(n || 0).toLocaleString('pt-BR');
+
+  function toast(message){ toastEl.textContent = message; toastEl.classList.add('show'); clearTimeout(window.__orbToast); window.__orbToast = setTimeout(() => toastEl.classList.remove('show'), 1800); }
+  function signal(o){
+    const d = Number(o.desconto_pct || 0), s = Number(o.score || 0), drop = Number(o.queda_vs_media_pct || 0);
+    if (drop >= 10) return 'CAIU MUITO';
+    if (d >= 60) return 'PREÇO FORTE';
+    if (s >= 90) return 'OFERTA QUENTE';
+    if (s >= 84) return 'OFERTA BOA';
+    return 'TENDÊNCIA';
   }
-  showOnly(appView);calcNextHunt();await loadData();
-}
-async function login(){setAuthMsg();const email=$('email').value.trim(),password=$('password').value;if(!email||!password){setAuthMsg('Preencha e-mail e senha.');return;}const {error}=await sb.auth.signInWithPassword({email,password});if(error){setAuthMsg('Login inválido ou acesso ainda não confirmado.');return;}await routeAuthenticated();}
-async function signup(){setAuthMsg();const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<6){setAuthMsg('Use um e-mail válido e uma senha com pelo menos 6 caracteres.');return;}const {data,error}=await sb.auth.signUp({email,password});if(error){setAuthMsg(error.message);return;}if(data.session){await routeAuthenticated();return;}setAuthMsg('', 'Conta criada. Confirme seu e-mail e depois entre para ativar sua assinatura ORB.');}
-async function startSubscription(){
-  $('billingError').textContent='';$('billingNotice').textContent='Criando checkout seguro...';
-  $('subscribeBtn').disabled=true;
-  try{
-    const {data,error}=await sb.functions.invoke('orb-create-subscription',{body:{action:'create'}});
-    if(error)throw error;
-    if(data?.status==='active'){await routeAuthenticated();return;}
-    if(!data?.checkout_url)throw new Error(data?.details||'Checkout indisponível.');
-    location.href=data.checkout_url;
-  }catch(e){$('billingError').textContent='Não consegui abrir o checkout agora. Tente novamente.';$('billingNotice').textContent='';}
-  finally{$('subscribeBtn').disabled=false;}
-}
-async function syncSubscription(auto=false){
-  $('billingError').textContent='';$('billingNotice').textContent='Confirmando assinatura com o Mercado Pago...';
-  $('syncBillingBtn').disabled=true;
-  try{
-    const {data,error}=await sb.functions.invoke('orb-create-subscription',{body:{action:'sync'}});
-    if(error)throw error;
-    await loadCustomer();
-    if(hasAccess()){
-      const u=new URL(location.href);u.searchParams.delete('billing');history.replaceState({},'',u.pathname+u.search+u.hash);
-      $('billingNotice').textContent='Assinatura confirmada. Liberando sua ORB...';setTimeout(()=>routeAuthenticated(),250);return;
+  function imgBlock(o){
+    const src = String(o.imagem || '').trim();
+    return src ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.parentNode.querySelector('.fallback').style.display='block'" /><span class="fallback" style="display:none">◎</span>` : '<span class="fallback">◎</span>';
+  }
+  function feedClass(f){ const s = String(f.status || '').toUpperCase(); return (s.includes('NOVO') || s.includes('OK') || s.includes('IGUAL')) ? 'ok' : (s.includes('ERRO') ? 'err' : ''); }
+  function feedText(f){ const s = String(f.status || '').toUpperCase(); if(s.includes('ERRO')) return 'Erro no download'; if(s.includes('NOVO')) return 'Feed novo detectado'; if(s.includes('IGUAL')) return 'Sem mudança'; return s || 'Status desconhecido'; }
+
+  async function login(){
+    $('loginError').textContent = ''; $('loginBtn').disabled = true; $('loginBtn').firstElementChild.textContent = 'Entrando...';
+    const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
+    $('loginBtn').disabled = false; $('loginBtn').firstElementChild.textContent = 'Entrar';
+    if(error){ $('loginError').textContent = 'E-mail ou senha inválidos.'; return; }
+    await showApp();
+  }
+  async function showApp(){ loginView.classList.add('hidden'); appView.classList.remove('hidden'); await loadData(); }
+  async function loadData(){
+    $('updated').innerHTML = '<span class="dot"></span><span>Atualizando...</span>';
+    $('refreshBtn').disabled = true;
+    const { data, error } = await sb.storage.from(C.panelBucket || 'orb-panel').download('latest.json');
+    $('refreshBtn').disabled = false;
+    if(error){
+      $('updated').innerHTML = '<span class="dot" style="background:#d34848"></span><span>Ainda não há dados publicados.</span>';
+      $('grid').innerHTML = '<div class="empty"><b>Nenhuma fila publicada ainda.</b>Assim que o Caçador enviar o primeiro latest.json, ela aparece aqui.</div>';
+      return;
     }
-    $('billingNotice').textContent=data?.provider_status==='pending'?'O pagamento ainda aparece como pendente. Se acabou de pagar, aguarde alguns segundos e verifique novamente.':'A assinatura ainda não está ativa.';
-  }catch(e){if(!auto)$('billingError').textContent='Não consegui verificar agora. Tente novamente em alguns segundos.';$('billingNotice').textContent='';}
-  finally{$('syncBillingBtn').disabled=false;}
-}
+    try { latestPayload = JSON.parse(await data.text()); } catch { toast('Não foi possível ler os dados.'); return; }
+    offers = latestPayload.offers || [];
+    const stats = latestPayload.stats || {};
+    $('mRows').textContent = fmt(stats.total_rows); $('mUnique').textContent = fmt(stats.unique_items); $('mCandidates').textContent = fmt(stats.candidates); $('mQueue').textContent = fmt(stats.queue ?? offers.length);
+    const dt = latestPayload.generated_at ? new Date(latestPayload.generated_at) : null;
+    const dtText = dt && !Number.isNaN(dt.getTime()) ? dt.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) : 'agora';
+    $('updated').innerHTML = `<span class="dot"></span><span>Atualizado em ${esc(dtText)}</span>`;
+    $('sideStatusText').textContent = `Última fila recebida em ${dtText}.`;
+    renderFeeds(latestPayload.feeds || []);
+    const cats = [...new Set(offers.map(o => o.categoria).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
+    $('cat').innerHTML = '<option value="">Todas as categorias</option>' + cats.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
+    render();
+  }
+  function renderFeeds(list){
+    if(!list.length){ $('feeds').innerHTML = '<div class="muted">Nenhum status de feed recebido.</div>'; $('feedSummary').textContent = '0 feeds'; return; }
+    const ok = list.filter(f => feedClass(f)==='ok').length;
+    $('feedSummary').textContent = `${ok}/${list.length} operando`;
+    $('feeds').innerHTML = list.map(f => `<div class="feed ${feedClass(f)}"><div class="feed-head"><span class="feed-status-dot"></span>${esc(f.nome || 'Feed')}</div><div class="feed-meta">${esc(feedText(f))}<br>Última mudança: ${esc(f.last_changed_at || '—')}</div></div>`).join('');
+  }
+  function render(){
+    const q = $('search').value.toLowerCase().trim(), c = $('cat').value, posted = readPosted();
+    const list = offers.filter(o => (!q || String(o.produto || '').toLowerCase().includes(q)) && (!c || o.categoria === c) && (!onlyPending || !posted.has(String(o.itemid || ''))));
+    $('resultCount').textContent = fmt(list.length); $('postedCount').textContent = `${fmt(offers.filter(o => posted.has(String(o.itemid || ''))).length)} postadas`;
+    if(!list.length){ $('grid').innerHTML = '<div class="empty"><b>Nada por aqui.</b>Tente limpar a busca ou mudar os filtros.</div>'; return; }
+    $('grid').innerHTML = list.map(o => {
+      const id = String(o.itemid || o.link_afiliado || o.produto || ''), done = posted.has(id), hist = Number(o.amostras_historico || 0), drop = Number(o.queda_vs_media_pct || 0);
+      return `<article class="offer-card ${done?'done':''}" data-id="${esc(id)}">
+        <div class="product-image">${imgBlock(o)}<span class="time-badge">${esc(o.hora_sugerida || '—')}</span></div>
+        <div>
+          <div class="offer-top"><span class="signal">↘ ${signal(o)}</span><span class="score">🔥 ${Math.round(Number(o.score || 0))}</span></div>
+          <div class="offer-title">${esc(o.produto || 'Produto')}</div>
+          <div class="meta"><span class="pill">${esc(o.categoria || 'Outros')}</span><span class="pill">⭐ ${Number(o.nota_produto || 0).toFixed(2)}</span>${o.likes?`<span class="pill">♥ ${fmt(o.likes)}</span>`:''}${o.loja?`<span class="pill">${esc(o.loja)}</span>`:''}${hist?`<span class="pill ${drop>=5?'hot':''}">Hist. ${hist}x${drop>0?` • ↓ ${drop.toFixed(1)}%`:''}</span>`:''}</div>
+          <div class="price"><span class="old">${money(o.preco_normal)}</span><span class="now">${money(o.preco_agora)}</span><span class="discount">-${Math.round(Number(o.desconto_pct || 0))}%</span></div>
+          <div class="actions"><button class="action copy" data-copy="${encodeURIComponent(o.copy_pronta || '')}">Copiar post</button><button class="action open" data-url="${esc(o.link_afiliado || '')}">Abrir</button><button class="action posted ${done?'is-done':''}" data-posted="${esc(id)}">${done?'Postado ✓':'Postado'}</button></div>
+        </div>
+      </article>`;
+    }).join('');
 
-async function saveAffiliate(){
-  $('onboardingError').textContent='';$('onboardingNotice').textContent='';
-  const affiliate=$('affiliateId').value.trim(),sub=($('subId').value.trim()||orbProfile?.sub_id||'');
-  if(affiliate.length<2){$('onboardingError').textContent='Informe seu ID de afiliado para continuar.';return;}
-  if(sub.length<2){$('onboardingError').textContent='Informe um Sub ID válido.';return;}
-  const {data:{user}}=await sb.auth.getUser();if(!user)return;
-  const {error}=await sb.from('orb_profiles').update({affiliate_id:affiliate,sub_id:sub,updated_at:new Date().toISOString()}).eq('user_id',user.id);
-  if(error){$('onboardingError').textContent='Não consegui salvar agora. Tente novamente.';return;}
-  orbProfile={...(orbProfile||{}),affiliate_id:affiliate,sub_id:sub};$('onboardingNotice').textContent='Configuração salva.';setTimeout(()=>routeAuthenticated(),250);
-}
+    document.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', async () => {
+      const text = decodeURIComponent(btn.dataset.copy || '');
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'Copiado ✓'; toast('Post copiado.'); setTimeout(() => btn.textContent='Copiar post',1200); } catch { toast('Não consegui copiar automaticamente.'); }
+    }));
+    document.querySelectorAll('[data-url]').forEach(btn => btn.addEventListener('click', () => { if(btn.dataset.url) window.open(btn.dataset.url,'_blank','noopener'); }));
+    document.querySelectorAll('[data-posted]').forEach(btn => btn.addEventListener('click', () => {
+      const set = readPosted(), id = btn.dataset.posted; set.has(id) ? set.delete(id) : set.add(id); savePosted(set); render();
+    }));
+  }
 
-function cleanTracking(base){
-  try{const u=new URL(String(base||''));u.searchParams.delete('affiliate_id');u.searchParams.delete('sub_id');return u.toString();}catch{return String(base||'').replace(/([?&])affiliate_id=[^&]*&?/g,'$1').replace(/([?&])sub_id=[^&]*&?/g,'$1').replace(/[?&]$/,'');}
-}
-function affiliateLink(o){
-  const base=cleanTracking(o.link_base||o.link_afiliado||'');if(!base)return '';
-  try{const u=new URL(base);u.searchParams.set('affiliate_id',String(orbProfile?.affiliate_id||''));u.searchParams.set('sub_id',String(orbProfile?.sub_id||''));return u.toString();}
-  catch{const sep=base.includes('?')?'&':'?';return `${base}${sep}affiliate_id=${encodeURIComponent(orbProfile?.affiliate_id||'')}&sub_id=${encodeURIComponent(orbProfile?.sub_id||'')}`;}
-}
-function copyForUser(o){const link=affiliateLink(o);if(o.copy_template)return String(o.copy_template).replace('{{LINK}}',link);const c=String(o.copy_pronta||'');return c.replace(/👉\s+https?:\/\/\S+/,`👉 ${link}`);}
-
-function renderFeeds(list=[]){
-  $('feeds').innerHTML=list.map(f=>{
-    const name=esc(f.name||f.feed_name||f.label||'Feed Shopee');
-    const ok=!f.error && !String(f.status||'').toLowerCase().includes('erro');
-    const badge=ok?'<span class="feed-badge ok">● ONLINE</span>':'<span class="feed-badge bad">● ATENÇÃO</span>';
-    const changed=esc(f.last_change||f.last_changed||f.ultima_mudanca||'monitorando');
-    return `<article class="feed"><div class="feed-left"><div class="feed-name">${name}</div><div class="feed-meta">Última mudança: ${changed}</div></div>${badge}</article>`
-  }).join('')||'<article class="feed"><div class="feed-left"><div class="feed-name">Feeds da Shopee</div><div class="feed-meta">Sincronização em nuvem ativa</div></div><span class="feed-badge neutral">MONITORANDO</span></article>';
-}
-
-async function loadData(){
-  const {data,error}=await sb.storage.from(C.panelBucket||'orb-panel').download('latest.json');
-  if(error){$('updated').innerHTML='<b>Sem acesso aos dados.</b> Seu usuário ainda pode precisar ser liberado como admin.';return;}
-  const j=JSON.parse(await data.text());offers=j.offers||[];
-  $('mRows').textContent=fmt(j.stats?.total_rows);$('mUnique').textContent=fmt(j.stats?.unique_items);$('mCandidates').textContent=fmt(j.stats?.candidates);$('mQueue').textContent=fmt(j.stats?.queue||offers.length);
-  const d=new Date(j.generated_at);$('updated').innerHTML=`Última varredura <b>${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</b> · ${fmt(offers.length)} oportunidades prontas`;
-  renderFeeds(j.feeds||[]);
-  const cats=[...new Set(offers.map(o=>o.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  $('cat').innerHTML='<option value="">Todas as categorias</option>'+cats.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');render();
-}
-
-function render(){
-  const q=$('search').value.toLowerCase().trim(),c=$('cat').value;
-  const list=offers.filter(o=>(!q||String(o.produto||'').toLowerCase().includes(q)||String(o.loja||'').toLowerCase().includes(q))&&(!c||o.categoria===c));
-  $('resultCount').textContent=`${fmt(list.length)} ${list.length===1?'oferta':'ofertas'} visíveis`;
-  $('grid').innerHTML=list.length?list.map(o=>`<article class="card">
-    <div class="row"><span class="time">${esc(o.hora_sugerida||'Agora')}</span><span class="score">MIRA ${Math.round(o.score||0)}</span></div>
-    <div class="title">${esc(o.produto)}</div>${o.loja?`<div class="store">${esc(o.loja)}</div>`:''}
-    <div class="pills"><span class="pill">${esc(o.categoria||'Outros')}</span><span class="pill">★ ${Number(o.nota_produto||0).toFixed(2)}</span>${o.likes?`<span class="pill">♥ ${fmt(o.likes)}</span>`:''}</div>
-    <div class="price"><span class="old">${money(o.preco_normal)}</span><span class="now">${money(o.preco_agora)}</span><span class="disc">-${Math.round(o.desconto_pct||0)}%</span>${o.queda_vs_media_pct?`<span class="drop">↓ ${Number(o.queda_vs_media_pct).toFixed(1)}% vs média</span>`:''}</div>
-    <div class="actions"><button class="copy" data-copy="${encodeURIComponent(copyForUser(o))}">COPIAR POST</button><button class="open" data-url="${esc(affiliateLink(o))}">ABRIR OFERTA ↗</button></div>
-  </article>`).join(''):'<div class="empty">Nenhum alvo encontrado com esses filtros.</div>';
-  document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(decodeURIComponent(b.dataset.copy));toast('Post copiado. Boa caça.')}catch{toast('Não consegui copiar automaticamente.')}}));
-  document.querySelectorAll('[data-url]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.url)window.open(b.dataset.url,'_blank','noopener')}));
-}
-
-$('loginBtn').addEventListener('click',login);
-$('signupBtn').addEventListener('click',signup);
-$('subscribeBtn').addEventListener('click',startSubscription);
-$('syncBillingBtn').addEventListener('click',()=>syncSubscription(false));
-$('billingLogoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.href=location.pathname;});
-$('saveAffiliateBtn').addEventListener('click',saveAffiliate);
-$('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-$('affiliateId').addEventListener('keydown',e=>{if(e.key==='Enter')saveAffiliate()});
-$('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.reload()});
-$('onboardingLogoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.reload()});
-$('affiliateSettingsBtn').addEventListener('click',()=>{$('affiliateId').value=orbProfile?.affiliate_id||'';$('subId').value=orbProfile?.sub_id||'';$('onboardingError').textContent='';$('onboardingNotice').textContent='';showOnly(onboardingView);});
-$('search').addEventListener('input',render);
-$('cat').addEventListener('change',render);
-(async()=>{calcNextHunt();const {data}=await sb.auth.getSession();if(data.session){await routeAuthenticated();if(new URL(location.href).searchParams.get('billing')==='return'&&!hasAccess())setTimeout(()=>syncSubscription(true),250);}})();
+  $('loginBtn').addEventListener('click', login); $('password').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+  $('search').addEventListener('input', render); $('cat').addEventListener('change', render); $('pendingBtn').addEventListener('click', () => { onlyPending = !onlyPending; $('pendingBtn').classList.toggle('active',onlyPending); render(); });
+  $('refreshBtn').addEventListener('click', loadData); $('sideRefresh').addEventListener('click', loadData);
+  async function logout(){ await sb.auth.signOut(); location.reload(); }
+  $('logoutBtn').addEventListener('click', logout); $('mobileLogout').addEventListener('click', logout);
+  (async () => { const { data } = await sb.auth.getSession(); if(data.session) await showApp(); })();
+})();
 </script>
 </body>
 </html>
