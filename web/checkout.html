@@ -6,58 +6,85 @@
   <meta name="theme-color" content="#f7f6fb" />
   <title>ORB</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <style>
-    :root{--bg:#f7f6fb;--ink:#17171c;--muted:#73727f;--line:#e7e5ef;--purple:#8757ff;--blue:#5267f7;--green:#14865a}
+    :root{--bg:#f7f6fb;--ink:#17171c;--muted:#73727f;--line:#e7e5ef;--purple:#8757ff;--blue:#5267f7;--green:#14865a;--danger:#d34848}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}button{font:inherit}
     .orb-mark{width:38px;height:38px;position:relative;display:inline-grid;place-items:center}.orb-mark:before{content:"";width:27px;height:27px;border-radius:50%;background:#15151a;position:absolute;z-index:2}.orb-mark:after{content:"";width:43px;height:13px;border-radius:50%;border:5px solid transparent;background:linear-gradient(90deg,var(--blue),#a855f7) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);mask-composite:exclude;transform:rotate(-13deg);position:absolute;z-index:3}.brand{display:flex;align-items:center;gap:10px;font-size:25px;font-weight:950;letter-spacing:-.04em}
     .wrap{max-width:1180px;margin:0 auto;padding:25px 24px 60px}.nav{display:flex;align-items:center;justify-content:space-between}.back{border:1px solid var(--line);background:rgba(255,255,255,.76);border-radius:12px;padding:9px 12px;color:#4a4953;font-weight:780;font-size:12px;cursor:pointer}
     .layout{display:grid;grid-template-columns:1.05fr .75fr;gap:54px;align-items:center;min-height:calc(100svh - 115px);padding:46px 0}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7159db;font-weight:900}.hero h1{font-size:clamp(43px,6vw,78px);line-height:.96;letter-spacing:-.065em;margin:13px 0 20px;max-width:740px}.hero p{font-size:17px;line-height:1.65;color:var(--muted);max-width:620px;margin:0 0 28px}.trust{display:flex;gap:9px;flex-wrap:wrap}.trust span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:11px;font-weight:760;color:#5f5d68}.visual{height:90px;position:relative;margin:34px 0 0;overflow:hidden}.visual .planet{position:absolute;width:66px;height:66px;border-radius:50%;background:#17171c;left:22%;top:10px}.visual .orbit{position:absolute;width:380px;height:72px;border:14px solid transparent;background:linear-gradient(90deg,#5267f7,#a855f7) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);mask-composite:exclude;border-radius:50%;left:3%;top:4px;transform:rotate(-8deg)}
-    .pay-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:25px;box-shadow:0 22px 70px rgba(31,24,62,.1);position:relative;overflow:hidden}.pay-card:before{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-125px;top:-125px;background:radial-gradient(circle,rgba(124,77,255,.16),transparent 68%)}.plan-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.plan-name{font-size:14px;font-weight:900}.badge{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;background:#f0ebff;color:#7444d8;border-radius:999px;padding:6px 8px}.price{margin:25px 0 5px;display:flex;align-items:flex-end;gap:7px}.price strong{font-size:46px;line-height:.9;letter-spacing:-.055em}.price span{color:var(--muted);font-size:12px;margin-bottom:4px}.price-note{font-size:11px;color:var(--muted);margin-bottom:22px}.divider{height:1px;background:var(--line);margin:20px 0}.features{display:grid;gap:13px}.feature{display:grid;grid-template-columns:25px 1fr;gap:10px;align-items:start}.check{width:25px;height:25px;border-radius:9px;background:#eaf8f1;color:var(--green);display:grid;place-items:center;font-weight:950;font-size:11px}.feature b{display:block;font-size:12px;margin-bottom:3px}.feature small{color:var(--muted);font-size:10px;line-height:1.45}.cta{width:100%;height:54px;border:0;background:#17171c;color:#fff;border-radius:14px;font-weight:900;margin-top:24px;cursor:pointer;transition:.18s;box-shadow:0 12px 26px rgba(21,21,28,.14)}.cta:hover{transform:translateY(-1px);background:#26252d}.secure{text-align:center;color:#8a8994;font-size:9px;margin:11px 0 0}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,10px);background:#17171c;color:#fff;padding:11px 14px;border-radius:12px;font-size:11px;font-weight:760;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .pay-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:25px;box-shadow:0 22px 70px rgba(31,24,62,.1);position:relative;overflow:hidden}.pay-card:before{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-125px;top:-125px;background:radial-gradient(circle,rgba(124,77,255,.16),transparent 68%)}.plan-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.plan-name{font-size:14px;font-weight:900}.badge{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;background:#f0ebff;color:#7444d8;border-radius:999px;padding:6px 8px}.price{margin:25px 0 5px;display:flex;align-items:flex-end;gap:7px}.price strong{font-size:46px;line-height:.9;letter-spacing:-.055em}.price span{color:var(--muted);font-size:12px;margin-bottom:4px}.price-note{font-size:11px;color:var(--muted);margin-bottom:22px}.divider{height:1px;background:var(--line);margin:20px 0}.features{display:grid;gap:13px}.feature{display:grid;grid-template-columns:25px 1fr;gap:10px;align-items:start}.check{width:25px;height:25px;border-radius:9px;background:#eaf8f1;color:var(--green);display:grid;place-items:center;font-weight:950;font-size:11px}.feature b{display:block;font-size:12px;margin-bottom:3px}.feature small{color:var(--muted);font-size:10px;line-height:1.45}.cta{width:100%;height:54px;border:0;background:#17171c;color:#fff;border-radius:14px;font-weight:900;margin-top:24px;cursor:pointer;transition:.18s;box-shadow:0 12px 26px rgba(21,21,28,.14)}.cta:hover{transform:translateY(-1px);background:#26252d}.cta:disabled{opacity:.55;cursor:wait;transform:none}.secure{text-align:center;color:#8a8994;font-size:9px;margin:11px 0 0}.status{display:none;margin:16px 0 0;padding:12px 13px;border-radius:12px;font-size:11px;line-height:1.45;font-weight:700}.status.show{display:block}.status.ok{background:#eaf8f1;color:#116b49}.status.err{background:#fff0f0;color:#b83d3d}.status.wait{background:#f4f1ff;color:#6d49c5}
     @media(max-width:820px){.wrap{padding:17px 16px 36px}.layout{grid-template-columns:1fr;gap:25px;min-height:auto;padding:46px 0}.hero h1{font-size:47px}.hero p{font-size:15px}.visual{height:60px;margin-top:22px}.visual .orbit{width:285px;height:58px;border-width:11px}.visual .planet{width:52px;height:52px}.pay-card{border-radius:23px;padding:20px}.nav .back{font-size:0}.nav .back:after{content:'←';font-size:16px}.price strong{font-size:42px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <nav class="nav"><div class="brand"><span class="orb-mark"></span> ORB</div><button class="back" onclick="history.length>1?history.back():location.href='./index.html'">← Voltar</button></nav>
+    <nav class="nav"><div class="brand"><span class="orb-mark"></span> ORB</div><button class="back" onclick="location.href='./index.html'">← Voltar</button></nav>
     <main class="layout">
       <section class="hero">
         <div class="eyebrow">Acesso ORB</div>
         <h1>Menos caça.<br>Mais oportunidade.</h1>
-        <p>Entre na ORB e tenha um painel direto ao ponto para acompanhar as melhores ofertas encontradas, organizadas e prontas para agir.</p>
+        <p>Assine a ORB e tenha acesso ao painel com as ofertas encontradas, organizadas e prontas para postar.</p>
         <div class="trust"><span>✓ Acesso privado</span><span>✓ Painel responsivo</span><span>✓ Fila organizada</span><span>✓ Atualizações automáticas</span></div>
         <div class="visual"><div class="planet"></div><div class="orbit"></div></div>
       </section>
 
       <aside class="pay-card">
-        <div class="plan-head"><div id="planName" class="plan-name">ORB</div><span class="badge">Acesso completo</span></div>
-        <div class="price"><strong id="planPrice">R$ 39,90</strong><span id="planPeriod">/mês</span></div>
-        <div class="price-note">Acesso ao painel ORB enquanto o plano estiver ativo.</div>
+        <div class="plan-head"><div class="plan-name">ORB</div><span class="badge">Acesso completo</span></div>
+        <div class="price"><strong>R$ 39,90</strong><span>/mês</span></div>
+        <div class="price-note">Cobrança recorrente mensal enquanto a assinatura estiver ativa.</div>
         <div class="divider"></div>
         <div class="features">
           <div class="feature"><span class="check">✓</span><div><b>Ofertas em um único painel</b><small>Busca, filtros, score e fila em uma interface simples.</small></div></div>
           <div class="feature"><span class="check">✓</span><div><b>Posts prontos para copiar</b><small>Texto e link afiliado organizados para agilizar sua rotina.</small></div></div>
           <div class="feature"><span class="check">✓</span><div><b>Acesso no celular e no PC</b><small>Layout responsivo pensado para trabalhar de onde estiver.</small></div></div>
-          <div class="feature"><span class="check">✓</span><div><b>Atualizações automáticas</b><small>O painel recebe as novas filas publicadas pelo Caçador ORB.</small></div></div>
+          <div class="feature"><span class="check">✓</span><div><b>Pagamento pelo Mercado Pago</b><small>Você conclui a autorização da assinatura no ambiente do Mercado Pago.</small></div></div>
         </div>
-        <button id="checkoutBtn" class="cta">Continuar para pagamento →</button>
-        <p class="secure">Pagamento processado pelo provedor configurado no checkout.</p>
+        <div id="status" class="status"></div>
+        <button id="checkoutBtn" class="cta">Assinar com Mercado Pago →</button>
+        <p class="secure">Pagamento processado pelo Mercado Pago.</p>
       </aside>
     </main>
   </div>
-  <div id="toast" class="toast">Link de pagamento ainda não configurado.</div>
+
   <script>
-    (()=>{
-      const C=window.ORB_CONFIG||{};
-      if(C.planName) document.getElementById('planName').textContent=C.planName;
-      if(C.planPrice) document.getElementById('planPrice').textContent=C.planPrice;
-      if(C.planPeriod!==undefined) document.getElementById('planPeriod').textContent=C.planPeriod;
-      const toast=document.getElementById('toast');
-      document.getElementById('checkoutBtn').addEventListener('click',()=>{
-        if(C.checkoutUrl){ location.href=C.checkoutUrl; return; }
-        toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);
-      });
-    })();
+  (async()=>{
+    const C=window.ORB_CONFIG||{};
+    const statusEl=document.getElementById('status');
+    const btn=document.getElementById('checkoutBtn');
+    const show=(msg,type='wait')=>{statusEl.textContent=msg;statusEl.className=`status show ${type}`};
+
+    if(!C.supabaseUrl||!C.supabasePublishableKey){show('config.js do Supabase não está configurado.','err');btn.disabled=true;return;}
+    const sb=supabase.createClient(C.supabaseUrl,C.supabasePublishableKey);
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session){show('Entre na sua conta ORB antes de assinar.','err');btn.textContent='Ir para o login →';btn.onclick=()=>location.href='./index.html';return;}
+
+    async function sync(){
+      show('Verificando sua assinatura...','wait');
+      const {data,error}=await sb.functions.invoke('orb-subscription',{body:{action:'sync'}});
+      if(error){show('Não consegui verificar a assinatura agora.','err');return false;}
+      if(data?.active){show('Pagamento confirmado. Liberando seu painel...','ok');setTimeout(()=>location.href='./index.html',1200);return true;}
+      if(data?.status==='pending'){show('A assinatura ainda está aguardando confirmação do Mercado Pago.','wait');}
+      else if(data?.status&&data.status!=='none'){show(`Status atual: ${data.status}.`,'wait');}
+      else statusEl.className='status';
+      return false;
+    }
+
+    const returned=new URLSearchParams(location.search).get('mp')==='return';
+    if(returned) await sync();
+
+    btn.addEventListener('click',async()=>{
+      if(btn.dataset.mode==='login'){location.href='./index.html';return;}
+      btn.disabled=true;btn.textContent='Abrindo Mercado Pago...';show('Criando sua assinatura segura...','wait');
+      const returnUrl=new URL('./checkout.html?mp=return',location.href).href;
+      const {data,error}=await sb.functions.invoke('orb-subscription',{body:{action:'create',return_url:returnUrl}});
+      if(error||!data){show('Não consegui iniciar a assinatura. Tente novamente.','err');btn.disabled=false;btn.textContent='Assinar com Mercado Pago →';return;}
+      if(data.active){show('Sua assinatura já está ativa. Abrindo o painel...','ok');setTimeout(()=>location.href='./index.html',900);return;}
+      if(data.init_point){location.href=data.init_point;return;}
+      show(data.message||'O Mercado Pago não devolveu o link de pagamento.','err');btn.disabled=false;btn.textContent='Assinar com Mercado Pago →';
+    });
+  })();
   </script>
 </body>
 </html>
