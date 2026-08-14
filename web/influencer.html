@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0910" />
+  <title>ORB • Influencers</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <style>
+    :root{
+      --bg:#09090e;--surface:#111119;--surface2:#171721;--line:#242330;--ink:#f7f5ff;
+      --muted:#8e8b9b;--purple:#8b5cf6;--purple2:#b54cff;--blue:#586cff;--green:#4ed995;
+      --red:#ef6b73;--gold:#f3b96b;--radius:22px;--shadow:0 24px 80px rgba(0,0,0,.35)
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:
+      radial-gradient(circle at 10% 0%,rgba(139,92,246,.14),transparent 28%),
+      radial-gradient(circle at 100% 15%,rgba(88,108,255,.11),transparent 25%),var(--bg);
+      color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased;min-height:100svh}
+    button,input,select{font:inherit}.hidden{display:none!important}
+    .orb-mark{width:39px;height:39px;display:grid;place-items:center;position:relative;flex:none}
+    .orb-mark:before{content:"";position:absolute;width:27px;height:27px;border-radius:50%;background:#f3f0ff;z-index:2;box-shadow:inset -5px -6px 12px rgba(0,0,0,.18)}
+    .orb-mark:after{content:"";position:absolute;width:43px;height:13px;border:4px solid transparent;border-radius:50%;background:linear-gradient(90deg,var(--blue),var(--purple2)) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;transform:rotate(-13deg);z-index:3}
+    .brand{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:950;letter-spacing:-.045em}
+    .brand small{font-size:10px;color:#777482;letter-spacing:.11em;text-transform:uppercase;margin-left:2px}
+    .muted{color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border-radius:999px;background:#1d1c27;border:1px solid #2b2937;color:#bbb7c8;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+    .pill.green{color:#70e1aa;background:rgba(78,217,149,.08);border-color:rgba(78,217,149,.15)}
+    .pill.purple{color:#c5a6ff;background:rgba(139,92,246,.09);border-color:rgba(139,92,246,.17)}
+    .btn{border:0;border-radius:13px;min-height:44px;padding:0 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:900;font-size:11px;cursor:pointer;transition:.18s}
+    .btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    .btn-primary{background:linear-gradient(100deg,#7358ff,#a94dff);color:#fff;box-shadow:0 12px 28px rgba(126,75,255,.22)}
+    .btn-soft{background:#1b1a24;color:#d8d5e0;border:1px solid #282735}.btn-danger{background:#2a171b;color:#ffadb2;border:1px solid #48242a}
+
+    /* LOGIN */
+    .auth{min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr;padding:20px;gap:20px}
+    .auth-art{border:1px solid #1d1c27;border-radius:30px;min-height:calc(100svh - 40px);background:
+      radial-gradient(circle at 70% 30%,rgba(168,85,247,.28),transparent 23%),
+      radial-gradient(circle at 40% 70%,rgba(82,103,247,.18),transparent 26%),
+      #0f0e15;position:relative;overflow:hidden;padding:38px;display:flex;flex-direction:column;justify-content:space-between}
+    .auth-art:before,.auth-art:after{content:"";position:absolute;border:1px solid rgba(163,128,255,.13);border-radius:50%;left:50%;top:48%;transform:translate(-50%,-50%) rotate(-15deg)}
+    .auth-art:before{width:560px;height:180px}.auth-art:after{width:430px;height:430px}
+    .planet{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:145px;height:145px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#4d4b58,#18171f 44%,#08080c 75%);box-shadow:0 0 80px rgba(139,92,246,.25);z-index:2}
+    .planet:after{content:"";position:absolute;width:250px;height:65px;border:13px solid transparent;border-radius:50%;background:linear-gradient(90deg,#5267f7,#ac4fff,#67ddff) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-13deg)}
+    .auth-copy{position:relative;z-index:4;max-width:600px}.auth-copy .eyebrow{color:#aa8bff;text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:950}.auth-copy h1{font-size:clamp(43px,5.4vw,76px);line-height:.96;letter-spacing:-.065em;margin:12px 0 17px}.auth-copy p{color:#9693a1;line-height:1.65;font-size:15px;max-width:510px}
+    .auth-form-wrap{display:grid;place-items:center;padding:28px}.auth-card{width:min(100%,420px)}.auth-card h2{font-size:32px;letter-spacing:-.045em;margin:0 0 8px}.auth-card>p{margin:0 0 27px;font-size:13px}
+    .field{margin:13px 0}.field label{display:block;color:#9692a1;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}.field input,.field select{width:100%;height:51px;border-radius:13px;border:1px solid #292735;background:#121119;color:#fff;padding:0 14px;outline:none}.field input:focus,.field select:focus{border-color:#805cff;box-shadow:0 0 0 4px rgba(128,92,255,.08)}.error{min-height:20px;color:#ff8f97;font-size:12px;margin-top:11px}
+
+    /* APP */
+    .app{width:min(calc(100% - 30px),1460px);margin:0 auto;display:grid;grid-template-columns:224px minmax(0,1fr);gap:20px;padding:18px 0 40px}
+    .side{height:calc(100svh - 36px);position:sticky;top:18px;background:rgba(15,14,21,.94);border:1px solid #1f1e29;border-radius:25px;padding:20px 15px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+    .side .brand{padding:3px 5px 23px}.side-title{color:#5f5c69;font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-weight:900;margin:13px 9px 6px}.side-item{padding:11px 10px;border-radius:11px;color:#9996a4;font-size:12px;font-weight:800;display:flex;align-items:center;gap:9px}.side-item.active{background:#1c1b25;color:#fff}.side-dot{width:7px;height:7px;border-radius:50%;background:#393744}.side-item.active .side-dot{background:#9a6eff;box-shadow:0 0 0 4px rgba(154,110,255,.1)}
+    .side-bottom{margin-top:auto}.support{background:linear-gradient(145deg,#1a1824,#111018);border:1px solid #282437;border-radius:16px;padding:13px}.support b{font-size:11px}.support p{color:#787583;font-size:10px;line-height:1.45;margin:6px 0 0}.logout{width:100%;margin-top:9px}
+    .main{min-width:0}.mobile-head{display:none}.topbar{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.topbar h1{font-size:27px;letter-spacing:-.045em;margin:0 0 6px}.topbar p{margin:0;font-size:11px;color:#777482}.top-actions{display:flex;gap:8px}
+    .metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:8px 0 13px}.metric{min-height:126px;background:rgba(17,17,25,.9);border:1px solid #211f2c;border-radius:19px;padding:15px;position:relative;overflow:hidden}.metric.primary{grid-column:span 2;background:linear-gradient(140deg,#181524,#111019);border-color:#2b2540}.metric:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;right:-55px;top:-55px;background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%)}.metric small{display:block;font-size:9px;color:#797684;text-transform:uppercase;letter-spacing:.08em;font-weight:850}.metric b{display:block;font-size:24px;letter-spacing:-.045em;margin-top:21px}.metric.primary b{font-size:30px}.metric em{font-style:normal;color:#6d6978;font-size:9px;display:block;margin-top:5px}
+    .grid2{display:grid;grid-template-columns:1.12fr .88fr;gap:12px;margin-bottom:12px}.card{background:rgba(17,17,25,.92);border:1px solid #211f2c;border-radius:21px;padding:17px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.card-head h2{font-size:13px;margin:0}.card-head span{font-size:9px;color:#6f6c79}
+    .ref-box{border:1px solid #292638;background:#0d0c12;border-radius:15px;padding:13px;margin-top:10px}.ref-label{color:#6d6977;font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;margin-bottom:6px}.copy-line{display:flex;align-items:center;gap:8px}.copy-value{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:800;color:#d7d2e4}.code{font-size:22px;letter-spacing:.04em}
+    .rule-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.rule{background:#0e0d14;border:1px solid #24212f;border-radius:15px;padding:13px}.rule b{display:block;font-size:21px;letter-spacing:-.04em;color:#c9b0ff}.rule span{display:block;font-size:9px;color:#73707e;margin-top:5px;line-height:1.45}
+    .term{margin-top:10px;background:linear-gradient(90deg,rgba(139,92,246,.1),rgba(88,108,255,.06));border:1px solid rgba(139,92,246,.16);border-radius:14px;padding:12px}.term b{font-size:11px}.term p{margin:5px 0 0;color:#7e7a89;font-size:9px;line-height:1.45}
+    .pix-state{border:1px solid #292637;background:#0e0d14;border-radius:15px;padding:14px}.pix-state b{display:block;font-size:13px}.pix-state p{margin:5px 0 0;color:#817d8c;font-size:10px;line-height:1.5}.pix-mask{font-size:21px!important;letter-spacing:-.02em;margin-top:10px!important;color:#eee9f8!important;font-weight:900}.locked{display:flex;align-items:center;gap:6px;color:#9b78ff!important}
+    .form-row{display:grid;grid-template-columns:120px 1fr;gap:8px}.pix-form .field{margin:0}.pix-note{font-size:9px;line-height:1.5;color:#777381;margin:10px 0}
+    .chart{display:flex;align-items:flex-end;gap:7px;height:180px;padding-top:20px}.bar-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}.bar{width:min(100%,30px);min-height:3px;border-radius:7px 7px 3px 3px;background:linear-gradient(to top,#6552ff,#ae4fff);box-shadow:0 0 18px rgba(126,75,255,.15)}.bar-col b{font-size:8px;color:#9b96a7}.bar-col span{font-size:7px;color:#5f5c69}
+    .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:680px}.table th{text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:#615e6b;font-weight:900;padding:10px;border-bottom:1px solid #23212d}.table td{font-size:10px;padding:12px 10px;border-bottom:1px solid #1d1b25;color:#aaa6b4}.table td:first-child{font-weight:900;color:#e2deea}.status{display:inline-flex;border-radius:999px;padding:5px 7px;background:#191821;color:#9994a4}.status.active{background:rgba(78,217,149,.08);color:#66d99f}.status.trial{background:rgba(139,92,246,.09);color:#b496f3}
+    .empty{text-align:center;padding:34px 10px;color:#666270;font-size:11px}.history{display:grid;gap:8px}.history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e0d14;border:1px solid #211f2b;border-radius:13px;padding:11px}.history-row b{font-size:11px}.history-row span{font-size:9px;color:#73707d}.history-row strong{font-size:12px;color:#6fdfa6}
+    .toast{position:fixed;right:18px;bottom:18px;background:#f3efff;color:#18151f;padding:11px 14px;border-radius:12px;font-size:11px;font-weight:850;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;z-index:50}.toast.show{opacity:1;transform:none}
+    .modal{position:fixed;inset:0;background:rgba(3,3,6,.72);backdrop-filter:blur(8px);z-index:60;display:grid;place-items:center;padding:18px}.modal-card{width:min(100%,420px);background:#121119;border:1px solid #292636;border-radius:22px;padding:22px;box-shadow:var(--shadow)}.modal-card h3{margin:0 0 9px;font-size:20px}.modal-card p{font-size:11px;line-height:1.6;color:#8b8796}.modal-actions{display:flex;gap:8px;margin-top:18px}.modal-actions .btn{flex:1}
+
+    @media(max-width:1180px){.metrics{grid-template-columns:repeat(3,1fr)}.metric.primary{grid-column:span 1}.grid2{grid-template-columns:1fr}.app{grid-template-columns:190px minmax(0,1fr)}}
+    @media(max-width:760px){
+      .auth{display:block;padding:0}.auth-art{display:none}.auth-form-wrap{min-height:100svh;padding:24px}.auth-card:before{content:"ORB";display:flex;align-items:center;font-size:25px;font-weight:950;letter-spacing:-.04em;margin-bottom:35px}
+      .app{display:block;width:100%;padding:0 14px 30px}.side{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;padding:14px 0 3px}.mobile-head .brand{font-size:21px}.mobile-head .orb-mark{transform:scale(.82);transform-origin:left center}.topbar{min-height:78px}.topbar h1{font-size:24px}.top-actions .btn span{display:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{min-height:112px;padding:13px}.metric.primary{grid-column:1/-1;min-height:120px}.metric b{font-size:22px;margin-top:18px}.metric.primary b{font-size:30px}.card{padding:14px;border-radius:18px}.grid2{gap:9px}.form-row{grid-template-columns:1fr}.chart{gap:4px;height:150px}.copy-line{align-items:stretch;flex-direction:column}.copy-line .btn{width:100%}.rule-grid{gap:7px}.table-wrap{margin:0 -14px;padding:0 14px}.toast{left:14px;right:14px;text-align:center}.modal-actions{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <section id="loginView" class="auth">
+    <div class="auth-art">
+      <div class="brand"><span class="orb-mark"></span> ORB <small>Influencers</small></div>
+      <div class="planet"></div>
+      <div class="auth-copy">
+        <div class="eyebrow">Programa de parceiros</div>
+        <h1>Indique. Cresça. Acumule recorrência.</h1>
+        <p>Acompanhe seus cadastros, assinantes e comissões ORB com dados reais. Pagamentos são fechados toda sexta-feira.</p>
+      </div>
+      <span class="pill purple" style="width:max-content">R$ 10 primeiro pagamento • R$ 4 recorrência</span>
+    </div>
+    <div class="auth-form-wrap">
+      <div class="auth-card">
+        <h2>Painel da influencer</h2>
+        <p class="muted">Entre com o acesso vinculado ao programa ORB.</p>
+        <div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="username" placeholder="seu@email.com"></div>
+        <div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div>
+        <button id="loginBtn" class="btn btn-primary" style="width:100%;min-height:51px">Entrar no painel →</button>
+        <div id="loginError" class="error"></div>
+      </div>
+    </div>
+  </section>
+
+  <main id="appView" class="app hidden">
+    <aside class="side">
+      <div class="brand"><span class="orb-mark"></span> ORB</div>
+      <div class="side-title">Influencer</div>
+      <div class="side-item active"><span class="side-dot"></span> Visão geral</div>
+      <div class="side-item"><span class="side-dot"></span> Indicações</div>
+      <div class="side-item"><span class="side-dot"></span> Pagamentos</div>
+      <div class="side-bottom">
+        <div class="support"><b>Precisa alterar o PIX?</b><p>A chave é bloqueada depois do cadastro. Para qualquer alteração, fale com o suporte ORB.</p></div>
+        <button id="logoutBtn" class="btn btn-soft logout">Sair</button>
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="mobile-head"><div class="brand"><span class="orb-mark"></span> ORB <small>Influencers</small></div><button id="mobileLogout" class="btn btn-soft">Sair</button></div>
+      <header class="topbar">
+        <div><h1 id="hello">Painel</h1><p id="subtitle">Carregando seus dados reais...</p></div>
+        <div class="top-actions"><button id="refreshBtn" class="btn btn-soft">↻ <span>Atualizar</span></button></div>
+      </header>
+
+      <section class="metrics">
+        <div class="metric primary"><small>Próximo pagamento • sexta</small><b id="nextAmount">R$ 0,00</b><em id="nextDate">—</em></div>
+        <div class="metric"><small>Assinantes ativos</small><b id="activeSubs">0</b><em>indicados pagando</em></div>
+        <div class="metric"><small>Cadastros</small><b id="referrals">0</b><em>indicados vinculados</em></div>
+        <div class="metric"><small>Cliques</small><b id="clicks">0</b><em>no seu link</em></div>
+        <div class="metric"><small>Conversão</small><b id="conversion">0%</b><em>cadastro → ativo</em></div>
+        <div class="metric"><small>Total recebido</small><b id="paidTotal">R$ 0,00</b><em>comissões pagas</em></div>
+      </section>
+
+      <section class="grid2">
+        <div class="card">
+          <div class="card-head"><h2>Seu link e cupom</h2><span>24h extras para quem indicar</span></div>
+          <span class="pill green">48h totais de teste para seu indicado</span>
+          <div class="ref-box">
+            <div class="ref-label">Cupom</div>
+            <div class="copy-line"><div id="code" class="copy-value code">—</div><button class="btn btn-soft" id="copyCode">Copiar cupom</button></div>
+          </div>
+          <div class="ref-box">
+            <div class="ref-label">Link de indicação</div>
+            <div class="copy-line"><div id="refLink" class="copy-value">—</div><button class="btn btn-primary" id="copyLink">Copiar link</button></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Seu modelo de comissão</h2><span id="programStatus">—</span></div>
+          <div class="rule-grid">
+            <div class="rule"><b>R$ 10</b><span>quando o indicado confirma o primeiro pagamento.</span></div>
+            <div class="rule"><b>R$ 4</b><span>a cada mensalidade seguinte enquanto ele continuar pagando.</span></div>
+          </div>
+          <div class="term"><b id="termTitle">Programa válido por 12 meses.</b><p id="termText">Ao chegar ao fim do período, fale com o suporte ORB para analisarmos uma extensão.</p></div>
+        </div>
+      </section>
+
+      <section class="grid2">
+        <div class="card">
+          <div class="card-head"><h2>Ganhos nas últimas semanas</h2><span id="earnedMonth">Este mês: R$ 0,00</span></div>
+          <div id="chart" class="chart"><div class="empty" style="width:100%">Sem movimentação ainda.</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Chave PIX</h2><span>Pagamento manual pela ORB</span></div>
+          <div id="pixConfigured" class="pix-state hidden">
+            <span class="pill purple">🔒 Chave bloqueada</span>
+            <p id="pixType">PIX</p>
+            <p id="pixMasked" class="pix-mask">—</p>
+            <p class="locked">Depois de cadastrada, a chave não pode ser alterada neste painel.</p>
+            <p>Para trocar, fale diretamente com o suporte ORB.</p>
+          </div>
+          <div id="pixForm" class="pix-form">
+            <div class="form-row">
+              <div class="field"><label>Tipo</label><select id="pixTypeInput"><option value="phone">Telefone</option><option value="cpf">CPF</option></select></div>
+              <div class="field"><label>Chave</label><input id="pixValue" inputmode="numeric" placeholder="DDD + telefone"></div>
+            </div>
+            <p class="pix-note">Aceitamos somente CPF ou telefone. Confira com atenção: depois de confirmar, a alteração fica disponível apenas via suporte.</p>
+            <button id="savePixBtn" class="btn btn-primary" style="width:100%">Cadastrar e bloquear chave PIX</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-bottom:12px">
+        <div class="card-head"><h2>Indicações recentes</h2><span>Dados anonimizados • nenhum nome de cliente é exibido</span></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Conta</th><th>Origem</th><th>Status</th><th>Cadastro</th><th>Comissão gerada</th></tr></thead>
+            <tbody id="refRows"></tbody>
+          </table>
+          <div id="refsEmpty" class="empty hidden">Nenhuma indicação vinculada ainda.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Histórico de pagamentos</h2><span>Sem botão de saque • pagamento feito pela ORB</span></div>
+        <div id="history" class="history"><div class="empty">Nenhum pagamento registrado ainda.</div></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">Copiado.</div>
+
+  <div id="pixModal" class="modal hidden">
+    <div class="modal-card">
+      <span class="pill purple">Confirmação importante</span>
+      <h3>Confirmar sua chave PIX?</h3>
+      <p id="pixConfirmText">Confira os dados. Depois de confirmar, você não poderá alterar a chave por conta própria. Qualquer troca deverá ser solicitada ao suporte ORB.</p>
+      <div class="modal-actions"><button id="cancelPix" class="btn btn-soft">Voltar e conferir</button><button id="confirmPix" class="btn btn-primary">Confirmar e bloquear</button></div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const C = window.ORB_CONFIG || {};
+  const $ = id => document.getElementById(id);
+  const money = v => Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const num = v => Number(v || 0).toLocaleString('pt-BR');
+  const date = v => v ? new Date(v).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}) : '—';
+  const toast = msg => { $('toast').textContent=msg; $('toast').classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>$('toast').classList.remove('show'),1700); };
+
+  if(!C.supabaseUrl || !C.supabasePublishableKey){
+    $('loginError').textContent='Configure o config.js da ORB antes de publicar.';
+    $('loginBtn').disabled=true;
+    return;
+  }
+  const sb = supabase.createClient(C.supabaseUrl,C.supabasePublishableKey);
+  let state=null;
+
+  async function invoke(name, body={}){
+    const {data,error}=await sb.functions.invoke(name,{body});
+    if(error){
+      let message=error.message||'Erro ao carregar.';
+      try{
+        const ctx=error.context;
+        if(ctx && typeof ctx.json==='function'){
+          const j=await ctx.json();
+          message=j?.message||j?.error||message;
+        }
+      }catch{}
+      throw new Error(message);
+    }
+    if(data?.ok===false) throw new Error(data.message||data.error||'Erro.');
+    return data;
+  }
+
+  async function login(){
+    $('loginError').textContent='';
+    const email=$('email').value.trim(), password=$('password').value;
+    if(!email||!password){$('loginError').textContent='Preencha e-mail e senha.';return;}
+    $('loginBtn').disabled=true;
+    const {error}=await sb.auth.signInWithPassword({email,password});
+    $('loginBtn').disabled=false;
+    if(error){$('loginError').textContent='E-mail ou senha inválidos.';return;}
+    await showApp();
+  }
+
+  async function showApp(){
+    $('loginView').classList.add('hidden');
+    $('appView').classList.remove('hidden');
+    await load();
+  }
+
+  function render(){
+    if(!state)return;
+    const i=state.influencer||{}, s=state.stats||{}, p=state.payout||{}, pix=state.pix||{};
+    $('hello').textContent=`Olá, ${i.display_name || 'parceira'} 👋`;
+    $('subtitle').textContent=`Programa ORB • pagamentos toda sexta-feira`;
+    $('nextAmount').textContent=money(p.next_amount);
+    $('nextDate').textContent=`previsto para ${date(p.next_date)}`;
+    $('activeSubs').textContent=num(s.active_subscribers);
+    $('referrals').textContent=num(s.referrals);
+    $('clicks').textContent=num(s.clicks);
+    $('conversion').textContent=`${Number(s.conversion_pct||0).toFixed(1).replace('.',',')}%`;
+    $('paidTotal').textContent=money(p.paid_total);
+    $('earnedMonth').textContent=`Este mês: ${money(s.earned_month)}`;
+    $('code').textContent=i.code||'—';
+
+    const base=(C.publicSiteUrl || location.origin).replace(/\/$/,'');
+    const link=i.code ? `${base}/?ref=${encodeURIComponent(i.code)}` : '—';
+    $('refLink').textContent=link;
+
+    const remaining=Number(i.days_remaining||0);
+    $('programStatus').textContent=i.status==='active' ? `${remaining} dias restantes` : 'Programa pausado';
+    $('termTitle').textContent=`Comissões até ${date(i.commission_ends_at)}.`;
+    $('termText').textContent=remaining>0
+      ? `O período começou em ${date(i.joined_at)} e dura 12 meses. Ao final, fale com o suporte ORB caso queira solicitar extensão.`
+      : 'Seu período atual terminou. Fale com o suporte ORB para analisarmos uma possível extensão.';
+
+    if(pix.configured){
+      $('pixConfigured').classList.remove('hidden'); $('pixForm').classList.add('hidden');
+      $('pixType').textContent=pix.type==='cpf'?'CPF cadastrado':'Telefone cadastrado';
+      $('pixMasked').textContent=pix.masked||'—';
+    }else{
+      $('pixConfigured').classList.add('hidden'); $('pixForm').classList.remove('hidden');
+    }
+
+    const refs=state.recent_referrals||[];
+    $('refsEmpty').classList.toggle('hidden',refs.length>0);
+    $('refRows').innerHTML=refs.map(r=>{
+      const st=String(r.status||'');
+      const cls=st.includes('ativo')?'active':st.includes('teste')?'trial':'';
+      return `<tr>
+        <td>${escapeHtml(r.reference||'—')}</td>
+        <td>${r.source==='link'?'Link':'Cupom'}</td>
+        <td><span class="status ${cls}">${escapeHtml(st)}</span></td>
+        <td>${date(r.attributed_at)}</td>
+        <td>${money(r.generated_commission)}</td>
+      </tr>`;
+    }).join('');
+
+    const hist=p.history||[];
+    $('history').innerHTML=hist.length ? hist.map(h=>`<div class="history-row">
+      <div><b>${date(h.period_end)}</b><span>${h.status==='paid'?'Pagamento confirmado':'Ajustado'}</span></div>
+      <strong>${money(h.amount)}</strong>
+    </div>`).join('') : '<div class="empty">Nenhum pagamento registrado ainda.</div>';
+
+    renderChart(state.weekly||[]);
+  }
+
+  function renderChart(rows){
+    if(!rows.length || !rows.some(x=>Number(x.earnings)>0)){
+      $('chart').innerHTML='<div class="empty" style="width:100%">Sem comissões registradas nessas semanas ainda.</div>';return;
+    }
+    const max=Math.max(...rows.map(x=>Number(x.earnings||0)),1);
+    $('chart').innerHTML=rows.map(x=>{
+      const h=Math.max(3,Math.round((Number(x.earnings||0)/max)*120));
+      const label=new Date(x.week+'T12:00:00Z').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',timeZone:'UTC'});
+      return `<div class="bar-col"><b>${money(x.earnings)}</b><div class="bar" style="height:${h}px"></div><span>${label}</span></div>`;
+    }).join('');
+  }
+
+  function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
+
+  async function load(){
+    $('refreshBtn').disabled=true;
+    try{
+      state=await invoke('orb-influencer-dashboard');
+      render();
+    }catch(e){
+      if(String(e.message).toLowerCase().includes('influencer') || String(e.message).toLowerCase().includes('programa')){
+        $('appView').classList.add('hidden');$('loginView').classList.remove('hidden');
+        $('loginError').textContent='Este login ainda não está liberado como influencer ORB.';
+      }else toast(e.message||'Erro ao atualizar.');
+    }finally{$('refreshBtn').disabled=false;}
+  }
+
+  function currentPixInput(){
+    const type=$('pixTypeInput').value, value=$('pixValue').value.trim();
+    return {type,value};
+  }
+  function openPixConfirm(){
+    const {type,value}=currentPixInput();
+    if(!value){toast('Digite sua chave PIX.');return;}
+    $('pixConfirmText').textContent=`Você está cadastrando ${type==='cpf'?'o CPF':'o telefone'} "${value}". Depois de confirmar, essa chave ficará bloqueada e só poderá ser alterada pelo suporte ORB.`;
+    $('pixModal').classList.remove('hidden');
+  }
+  async function savePix(){
+    const body=currentPixInput();
+    $('confirmPix').disabled=true;
+    try{
+      await invoke('orb-influencer-pix',body);
+      $('pixModal').classList.add('hidden');
+      toast('Chave PIX cadastrada e bloqueada.');
+      await load();
+    }catch(e){toast(e.message||'Não foi possível salvar.');}
+    finally{$('confirmPix').disabled=false;}
+  }
+
+  async function copy(text){try{await navigator.clipboard.writeText(text);toast('Copiado.');}catch{toast('Não consegui copiar automaticamente.');}}
+  $('loginBtn').addEventListener('click',login);
+  $('password').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+  $('refreshBtn').addEventListener('click',load);
+  $('copyCode').addEventListener('click',()=>copy($('code').textContent));
+  $('copyLink').addEventListener('click',()=>copy($('refLink').textContent));
+  $('pixTypeInput').addEventListener('change',()=>{$('pixValue').placeholder=$('pixTypeInput').value==='cpf'?'000.000.000-00':'DDD + telefone';});
+  $('savePixBtn').addEventListener('click',openPixConfirm);
+  $('cancelPix').addEventListener('click',()=>$('pixModal').classList.add('hidden'));
+  $('confirmPix').addEventListener('click',savePix);
+  async function logout(){await sb.auth.signOut();location.reload();}
+  $('logoutBtn').addEventListener('click',logout);$('mobileLogout').addEventListener('click',logout);
+
+  (async()=>{const {data}=await sb.auth.getSession();if(data.session)await showApp();})();
+})();
+</script>
+</body>
+</html>
