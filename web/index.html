@@ -70,6 +70,8 @@
         <div id="authSubtitle" class="muted">Acesso privado ORB.</div>
         <div class="field"><label for="email">E-MAIL</label><input id="email" type="email" placeholder="seu@email.com" autocomplete="username" /></div>
         <div class="field"><label for="password">SENHA</label><input id="password" type="password" placeholder="Sua senha" autocomplete="current-password" /></div>
+        <div id="refField" class="field hidden"><label for="refCode">CUPOM DE INDICAÇÃO <span style="font-weight:600;color:#8e8b98">(opcional)</span></label><input id="refCode" type="text" maxlength="40" placeholder="Ex.: JULIA" autocomplete="off" style="text-transform:uppercase" /></div>
+        <div id="refBonus" class="muted hidden" style="margin:-3px 0 12px;color:#7041d9;font-weight:750">Cupom válido dá +24h de teste: 48h no total.</div>
         <button id="loginBtn" class="primary-btn"><span>Entrar</span><span>→</span></button>
         <div id="loginError" class="login-error"></div>
         <div id="loginSuccess" class="auth-success"></div>
@@ -137,6 +139,75 @@
   }
 
   const sb = supabase.createClient(C.supabaseUrl, C.supabasePublishableKey);
+
+  const REF_KEY = 'orb-referral-code-v1';
+  const REF_SOURCE_KEY = 'orb-referral-source-v1';
+  const VISITOR_KEY = 'orb-referral-visitor-v1';
+
+  function cleanRefCode(value){
+    const code = String(value || '').trim().toUpperCase();
+    return /^[A-Z0-9_-]{2,40}$/.test(code) ? code : '';
+  }
+
+  function getVisitorId(){
+    let id = localStorage.getItem(VISITOR_KEY);
+    if(!id){
+      id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      localStorage.setItem(VISITOR_KEY,id);
+    }
+    return id;
+  }
+
+  function rememberReferral(code, source){
+    const clean = cleanRefCode(code);
+    if(!clean) return '';
+    localStorage.setItem(REF_KEY,clean);
+    localStorage.setItem(REF_SOURCE_KEY,source === 'link' ? 'link' : 'coupon');
+    if($('refCode')) $('refCode').value = clean;
+    return clean;
+  }
+
+  async function trackReferralLink(code){
+    const clean = cleanRefCode(code);
+    if(!clean) return;
+    const today = new Date().toISOString().slice(0,10);
+    const trackedKey = `orb-ref-tracked:${clean}:${today}`;
+    if(localStorage.getItem(trackedKey)) return;
+
+    try{
+      const { data, error } = await sb.functions.invoke('orb-referral-track',{body:{
+        code:clean,
+        visitor_id:getVisitorId(),
+        landing_path:location.pathname
+      }});
+      if(!error && data?.ok) localStorage.setItem(trackedKey,'1');
+    }catch(_){}
+  }
+
+  async function claimPendingReferral(){
+    const typed = cleanRefCode($('refCode')?.value);
+    const stored = cleanRefCode(localStorage.getItem(REF_KEY));
+    const code = typed || stored;
+    if(!code) return {ok:true,skipped:true};
+
+    const source = typed && typed !== stored ? 'coupon' : (localStorage.getItem(REF_SOURCE_KEY) || 'coupon');
+    if(typed) rememberReferral(typed,'coupon');
+
+    const { data, error } = await sb.functions.invoke('orb-referral-claim',{body:{code,source}});
+    if(error) return {ok:false,error};
+    if(data?.ok){
+      localStorage.setItem(REF_KEY,String(data.code || code));
+      return {ok:true,data};
+    }
+    return {ok:false,data};
+  }
+
+  const queryRef = cleanRefCode(new URLSearchParams(location.search).get('ref'));
+  if(queryRef){
+    rememberReferral(queryRef,'link');
+    trackReferralLink(queryRef);
+  }
+
   const money = (v) => Number(v || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
   const esc = (s) => String(s ?? '').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
   const postedKey = 'orb-posted-v1';
@@ -232,6 +303,12 @@
     $('authSwitchText').textContent = creating ? 'Já tem conta?' : 'Ainda não tem conta?';
     $('authSwitchBtn').textContent = creating ? 'Entrar' : 'Criar conta';
     $('password').setAttribute('autocomplete', creating ? 'new-password' : 'current-password');
+    $('refField').classList.toggle('hidden', !creating);
+    $('refBonus').classList.toggle('hidden', !creating);
+    if(creating){
+      const saved = cleanRefCode(localStorage.getItem(REF_KEY));
+      if(saved && !$('refCode').value) $('refCode').value = saved;
+    }
   }
 
   updateGreeting();
@@ -257,7 +334,12 @@
         return;
       }
       if(data?.session){
-        $('loginSuccess').textContent = 'Conta criada. Seu login funcionou; agora o acesso ao painel precisa estar autorizado.';
+        const claim = await claimPendingReferral();
+        if(claim?.ok && !claim?.skipped && claim?.data?.extra_trial_hours){
+          $('loginSuccess').textContent = 'Conta criada e cupom vinculado. Seu teste terá 48h no total.';
+        } else {
+          $('loginSuccess').textContent = 'Conta criada. Seu login funcionou; agora o acesso ao painel precisa estar autorizado.';
+        }
       } else {
         $('loginSuccess').textContent = 'Conta criada. Confirme o e-mail que o Supabase enviou e depois entre.';
       }
@@ -269,6 +351,13 @@
     $('loginBtn').disabled = false;
     $('loginBtn').firstElementChild.textContent = 'Entrar';
     if(error){ $('loginError').textContent = 'E-mail ou senha inválidos.'; return; }
+
+    const claim = await claimPendingReferral();
+    if(claim?.ok === false && cleanRefCode(localStorage.getItem(REF_KEY))){
+      const msg = claim?.data?.message || 'Não foi possível vincular o cupom.';
+      toast(msg);
+    }
+
     await showApp();
   }
   async function syncSubscription(){
@@ -374,7 +463,13 @@
   $('refreshBtn').addEventListener('click', loadData); $('sideRefresh').addEventListener('click', loadData);
   async function logout(){ await sb.auth.signOut(); location.reload(); }
   $('logoutBtn').addEventListener('click', logout); $('mobileLogout').addEventListener('click', logout);
-  (async () => { const { data } = await sb.auth.getSession(); if(data.session) await showApp(); })();
+  (async () => {
+    const { data } = await sb.auth.getSession();
+    if(data.session){
+      await claimPendingReferral();
+      await showApp();
+    }
+  })();
 })();
 </script>
 </body>
