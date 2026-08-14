@@ -50,7 +50,7 @@
     /* APP */
     .app{width:min(calc(100% - 30px),1460px);margin:0 auto;display:grid;grid-template-columns:224px minmax(0,1fr);gap:20px;padding:18px 0 40px}
     .side{height:calc(100svh - 36px);position:sticky;top:18px;background:rgba(15,14,21,.94);border:1px solid #1f1e29;border-radius:25px;padding:20px 15px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-    .side .brand{padding:3px 5px 23px}.side-title{color:#5f5c69;font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-weight:900;margin:13px 9px 6px}.side-item{padding:11px 10px;border-radius:11px;color:#9996a4;font-size:12px;font-weight:800;display:flex;align-items:center;gap:9px}.side-item.active{background:#1c1b25;color:#fff}.side-dot{width:7px;height:7px;border-radius:50%;background:#393744}.side-item.active .side-dot{background:#9a6eff;box-shadow:0 0 0 4px rgba(154,110,255,.1)}
+    .side .brand{padding:3px 5px 23px}.side-title{color:#5f5c69;font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-weight:900;margin:13px 9px 6px}.side-item{padding:11px 10px;border-radius:11px;color:#9996a4;font-size:12px;font-weight:800;display:flex;align-items:center;gap:9px;width:100%;border:0;background:transparent;text-align:left;cursor:pointer}.side-item.active{background:#1c1b25;color:#fff}.side-dot{width:7px;height:7px;border-radius:50%;background:#393744}.side-item.active .side-dot{background:#9a6eff;box-shadow:0 0 0 4px rgba(154,110,255,.1)}
     .side-bottom{margin-top:auto}.support{background:linear-gradient(145deg,#1a1824,#111018);border:1px solid #282437;border-radius:16px;padding:13px}.support b{font-size:11px}.support p{color:#787583;font-size:10px;line-height:1.45;margin:6px 0 0}.logout{width:100%;margin-top:9px}
     .main{min-width:0}.mobile-head{display:none}.topbar{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.topbar h1{font-size:27px;letter-spacing:-.045em;margin:0 0 6px}.topbar p{margin:0;font-size:11px;color:#777482}.top-actions{display:flex;gap:8px}
     .metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:8px 0 13px}.metric{min-height:126px;background:rgba(17,17,25,.9);border:1px solid #211f2c;border-radius:19px;padding:15px;position:relative;overflow:hidden}.metric.primary{grid-column:span 2;background:linear-gradient(140deg,#181524,#111019);border-color:#2b2540}.metric:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;right:-55px;top:-55px;background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%)}.metric small{display:block;font-size:9px;color:#797684;text-transform:uppercase;letter-spacing:.08em;font-weight:850}.metric b{display:block;font-size:24px;letter-spacing:-.045em;margin-top:21px}.metric.primary b{font-size:30px}.metric em{font-style:normal;color:#6d6978;font-size:9px;display:block;margin-top:5px}
@@ -101,11 +101,11 @@
     <aside class="side">
       <div class="brand"><span class="orb-mark"></span> ORB</div>
       <div class="side-title">Influencer</div>
-      <div class="side-item active"><span class="side-dot"></span> Visão geral</div>
-      <div class="side-item"><span class="side-dot"></span> Indicações</div>
-      <div class="side-item"><span class="side-dot"></span> Pagamentos</div>
+      <button class="side-item active" data-scroll="overview"><span class="side-dot"></span> Visão geral</button>
+      <button class="side-item" data-scroll="referralsSection"><span class="side-dot"></span> Indicações</button>
+      <button class="side-item" data-scroll="paymentsSection"><span class="side-dot"></span> Pagamentos</button>
       <div class="side-bottom">
-        <div class="support"><b>Precisa alterar o PIX?</b><p>A chave é bloqueada depois do cadastro. Para qualquer alteração, fale com o suporte ORB.</p></div>
+        <div class="support"><b>Precisa de ajuda?</b><p>Alteração de PIX, dúvidas sobre comissão ou extensão do programa: fale com o suporte ORB.</p><button id="supportBtn" class="btn btn-primary" style="width:100%;margin-top:10px;min-height:39px">Falar com suporte</button></div>
         <button id="logoutBtn" class="btn btn-soft logout">Sair</button>
       </div>
     </aside>
@@ -114,10 +114,10 @@
       <div class="mobile-head"><div class="brand"><span class="orb-mark"></span> ORB <small>Influencers</small></div><button id="mobileLogout" class="btn btn-soft">Sair</button></div>
       <header class="topbar">
         <div><h1 id="hello">Painel</h1><p id="subtitle">Carregando seus dados reais...</p></div>
-        <div class="top-actions"><button id="refreshBtn" class="btn btn-soft">↻ <span>Atualizar</span></button></div>
+        <div class="top-actions"><button id="topSupportBtn" class="btn btn-soft">Suporte</button><button id="refreshBtn" class="btn btn-soft">↻ <span>Atualizar</span></button></div>
       </header>
 
-      <section class="metrics">
+      <section id="overview" class="metrics">
         <div class="metric primary"><small>Próximo pagamento • sexta</small><b id="nextAmount">R$ 0,00</b><em id="nextDate">—</em></div>
         <div class="metric"><small>Assinantes ativos</small><b id="activeSubs">0</b><em>indicados pagando</em></div>
         <div class="metric"><small>Cadastros</small><b id="referrals">0</b><em>indicados vinculados</em></div>
@@ -164,6 +164,7 @@
             <p id="pixMasked" class="pix-mask">—</p>
             <p class="locked">Depois de cadastrada, a chave não pode ser alterada neste painel.</p>
             <p>Para trocar, fale diretamente com o suporte ORB.</p>
+            <button id="pixSupportBtn" class="btn btn-soft" style="margin-top:10px">Solicitar alteração pelo suporte</button>
           </div>
           <div id="pixForm" class="pix-form">
             <div class="form-row">
@@ -176,7 +177,7 @@
         </div>
       </section>
 
-      <section class="card" style="margin-bottom:12px">
+      <section id="referralsSection" class="card" style="margin-bottom:12px">
         <div class="card-head"><h2>Indicações recentes</h2><span>Dados anonimizados • nenhum nome de cliente é exibido</span></div>
         <div class="table-wrap">
           <table class="table">
@@ -187,7 +188,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section id="paymentsSection" class="card">
         <div class="card-head"><h2>Histórico de pagamentos</h2><span>Sem botão de saque • pagamento feito pela ORB</span></div>
         <div id="history" class="history"><div class="empty">Nenhum pagamento registrado ainda.</div></div>
       </section>
@@ -212,6 +213,18 @@
   const money = v => Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
   const num = v => Number(v || 0).toLocaleString('pt-BR');
   const date = v => v ? new Date(v).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}) : '—';
+
+  function whatsappUrl(message){
+    const phone = String(C.supportWhatsApp || '').replace(/\D/g,'');
+    const text = encodeURIComponent(message);
+    return phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`;
+  }
+
+  function openSupport(){
+    const name = state?.influencer?.display_name || 'influencer';
+    window.open(whatsappUrl(`Olá! Sou ${name}, influencer da ORB, e preciso de ajuda com meu painel/programa de afiliados.`),'_blank','noopener');
+  }
+
   const toast = msg => { $('toast').textContent=msg; $('toast').classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>$('toast').classList.remove('show'),1700); };
 
   if(!C.supabaseUrl || !C.supabasePublishableKey){
@@ -243,17 +256,66 @@
     $('loginError').textContent='';
     const email=$('email').value.trim(), password=$('password').value;
     if(!email||!password){$('loginError').textContent='Preencha e-mail e senha.';return;}
-    $('loginBtn').disabled=true;
-    const {error}=await sb.auth.signInWithPassword({email,password});
-    $('loginBtn').disabled=false;
-    if(error){$('loginError').textContent='E-mail ou senha inválidos.';return;}
-    await showApp();
-  }
 
-  async function showApp(){
+    $('loginBtn').disabled=true;
+    $('loginBtn').textContent='Verificando acesso...';
+
+    const {error}=await sb.auth.signInWithPassword({email,password});
+    if(error){
+      $('loginBtn').disabled=false;
+      $('loginBtn').textContent='Entrar no painel →';
+      $('loginError').textContent='E-mail ou senha inválidos.';
+      return;
+    }
+
+    const ok = await load({ preflight:true });
+
+    $('loginBtn').disabled=false;
+    $('loginBtn').textContent='Entrar no painel →';
+
+    if(!ok) return;
+
     $('loginView').classList.add('hidden');
     $('appView').classList.remove('hidden');
-    await load();
+    render();
+  }
+
+  async function load({ preflight=false } = {}){
+    if(!preflight) $('refreshBtn').disabled=true;
+
+    try{
+      const nextState=await invoke('orb-influencer-dashboard');
+      state=nextState;
+
+      if(!preflight) render();
+      return true;
+    }catch(e){
+      const msg=String(e.message||'');
+      const lower=msg.toLowerCase();
+      const notInfluencer =
+        lower.includes('influencer') ||
+        lower.includes('programa') ||
+        lower.includes('not_influencer') ||
+        lower.includes('forbidden');
+
+      if(notInfluencer){
+        // Mantém o usuário na tela de login; não mostra o painel nem por um instante.
+        await sb.auth.signOut();
+        $('appView').classList.add('hidden');
+        $('loginView').classList.remove('hidden');
+        $('loginError').textContent='Esta conta existe na ORB, mas não está cadastrada como influencer.';
+      }else{
+        if(preflight){
+          await sb.auth.signOut();
+          $('loginError').textContent='Não foi possível validar seu acesso agora. Tente novamente.';
+        }else{
+          toast(msg||'Erro ao atualizar.');
+        }
+      }
+      return false;
+    }finally{
+      if(!preflight) $('refreshBtn').disabled=false;
+    }
   }
 
   function render(){
@@ -327,19 +389,6 @@
 
   function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
 
-  async function load(){
-    $('refreshBtn').disabled=true;
-    try{
-      state=await invoke('orb-influencer-dashboard');
-      render();
-    }catch(e){
-      if(String(e.message).toLowerCase().includes('influencer') || String(e.message).toLowerCase().includes('programa')){
-        $('appView').classList.add('hidden');$('loginView').classList.remove('hidden');
-        $('loginError').textContent='Este login ainda não está liberado como influencer ORB.';
-      }else toast(e.message||'Erro ao atualizar.');
-    }finally{$('refreshBtn').disabled=false;}
-  }
-
   function currentPixInput(){
     const type=$('pixTypeInput').value, value=$('pixValue').value.trim();
     return {type,value};
@@ -365,7 +414,18 @@
   async function copy(text){try{await navigator.clipboard.writeText(text);toast('Copiado.');}catch{toast('Não consegui copiar automaticamente.');}}
   $('loginBtn').addEventListener('click',login);
   $('password').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
-  $('refreshBtn').addEventListener('click',load);
+  $('refreshBtn').addEventListener('click',()=>load());
+
+  document.querySelectorAll('[data-scroll]').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.side-item').forEach(x => x.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById(btn.dataset.scroll);
+    if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+
+  $('supportBtn').addEventListener('click',openSupport);
+  $('topSupportBtn').addEventListener('click',openSupport);
+  $('pixSupportBtn').addEventListener('click',openSupport);
   $('copyCode').addEventListener('click',()=>copy($('code').textContent));
   $('copyLink').addEventListener('click',()=>copy($('refLink').textContent));
   $('pixTypeInput').addEventListener('change',()=>{$('pixValue').placeholder=$('pixTypeInput').value==='cpf'?'000.000.000-00':'DDD + telefone';});
@@ -375,7 +435,17 @@
   async function logout(){await sb.auth.signOut();location.reload();}
   $('logoutBtn').addEventListener('click',logout);$('mobileLogout').addEventListener('click',logout);
 
-  (async()=>{const {data}=await sb.auth.getSession();if(data.session)await showApp();})();
+  (async()=>{
+    const {data}=await sb.auth.getSession();
+    if(data.session){
+      const ok = await load({preflight:true});
+      if(ok){
+        $('loginView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        render();
+      }
+    }
+  })();
 })();
 </script>
 </body>
