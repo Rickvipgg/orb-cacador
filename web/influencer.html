@@ -67,6 +67,19 @@
     .modal{position:fixed;inset:0;background:rgba(3,3,6,.72);backdrop-filter:blur(8px);z-index:60;display:grid;place-items:center;padding:18px}.modal-card{width:min(100%,420px);background:#121119;border:1px solid #292636;border-radius:22px;padding:22px;box-shadow:var(--shadow)}.modal-card h3{margin:0 0 9px;font-size:20px}.modal-card p{font-size:11px;line-height:1.6;color:#8b8796}.modal-actions{display:flex;gap:8px;margin-top:18px}.modal-actions .btn{flex:1}
 
 
+
+    /* INSTAGRAM CONNECT */
+    .instagram-card{margin:13px 0;background:linear-gradient(145deg,#15131e,#0f0e15);border:1px solid #29243a;border-radius:22px;padding:18px;position:relative;overflow:hidden}
+    .instagram-card:before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;left:-170px;bottom:-220px;background:radial-gradient(circle,rgba(193,53,132,.18),transparent 68%);pointer-events:none}
+    .instagram-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;position:relative;z-index:2}
+    .instagram-title{display:flex;gap:11px;align-items:center}.instagram-logo{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);box-shadow:0 8px 26px rgba(193,53,132,.18)}
+    .instagram-head h2{font-size:17px;margin:0 0 5px}.instagram-head p{margin:0;color:#817d8e;font-size:10px;line-height:1.45}
+    .instagram-body{position:relative;z-index:2;margin-top:14px;border:1px solid #282432;background:#121119;border-radius:16px;padding:14px}
+    .instagram-disconnected{display:flex;justify-content:space-between;align-items:center;gap:14px}.instagram-disconnected b{display:block;font-size:11px;margin-bottom:4px}.instagram-disconnected p{margin:0;color:#817d8e;font-size:9px;line-height:1.5;max-width:650px}
+    .instagram-connected{display:flex;align-items:center;justify-content:space-between;gap:14px}.instagram-profile{display:flex;align-items:center;gap:11px;min-width:0}.instagram-avatar{width:48px;height:48px;border-radius:50%;background:#221e2a;border:2px solid #3c334d;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:950;color:#c5aaff}.instagram-avatar img{width:100%;height:100%;object-fit:cover}.instagram-profile b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.instagram-profile span{display:block;color:#6fdb9f;font-size:9px;font-weight:850;margin-top:4px}.instagram-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+    .instagram-note{margin-top:10px;color:#706b7a;font-size:8px;line-height:1.45}
+    @media(max-width:700px){.instagram-head,.instagram-disconnected,.instagram-connected{display:block}.instagram-disconnected .btn,.instagram-actions{margin-top:12px}.instagram-actions{justify-content:flex-start}}
+
     /* RANKING GLOBAL */
     .ranking-card{margin:13px 0;background:linear-gradient(145deg,#15131e,#0f0e15);border:1px solid #29243a;border-radius:22px;padding:18px;position:relative;overflow:hidden}
     .ranking-card:before{content:"";position:absolute;width:360px;height:360px;border-radius:50%;right:-180px;top:-210px;background:radial-gradient(circle,rgba(139,92,246,.22),transparent 68%);pointer-events:none}
@@ -125,6 +138,7 @@
       <div class="brand"><span class="orb-mark"></span> ORB</div>
       <div class="side-title">Influencer</div>
       <button class="side-item active" data-scroll="overview"><span class="side-dot"></span> Visão geral</button>
+      <button class="side-item" data-scroll="instagramSection"><span class="side-dot"></span> Instagram</button>
       <button class="side-item" data-scroll="rankingSection"><span class="side-dot"></span> Ranking Global</button>
       <button class="side-item" data-scroll="referralsSection"><span class="side-dot"></span> Indicações</button>
       <button class="side-item" data-scroll="paymentsSection"><span class="side-dot"></span> Pagamentos</button>
@@ -150,6 +164,45 @@
         <div class="metric"><small>Total recebido</small><b id="paidTotal">R$ 0,00</b><em>comissões pagas</em></div>
       </section>
 
+      <section id="instagramSection" class="instagram-card">
+        <div class="instagram-head">
+          <div class="instagram-title">
+            <div class="instagram-logo">◎</div>
+            <div>
+              <h2>Instagram da influencer</h2>
+              <p>Conecte sua conta profissional para participar oficialmente do Ranking Global ORB.</p>
+            </div>
+          </div>
+          <span id="instagramStatusPill" class="pill">Não conectado</span>
+        </div>
+
+        <div class="instagram-body">
+          <div id="instagramDisconnected" class="instagram-disconnected">
+            <div>
+              <b>Conecte seu Instagram profissional</b>
+              <p>A ORB usa o login oficial do Instagram para confirmar que o @ realmente pertence a você. O ranking libera após a autorização.</p>
+            </div>
+            <button id="connectInstagramBtn" class="btn btn-primary">Conectar Instagram →</button>
+          </div>
+
+          <div id="instagramConnected" class="instagram-connected hidden">
+            <div class="instagram-profile">
+              <div id="instagramAvatar" class="instagram-avatar">IG</div>
+              <div>
+                <b id="instagramUsername">@instagram</b>
+                <span>✓ Perfil verificado pela ORB</span>
+              </div>
+            </div>
+            <div class="instagram-actions">
+              <a id="instagramProfileLink" class="btn" href="#" target="_blank" rel="noopener">Abrir perfil</a>
+              <button id="reconnectInstagramBtn" class="btn">Reconectar</button>
+            </div>
+          </div>
+
+          <div class="instagram-note">A ORB guarda apenas os dados necessários para identificar o perfil no programa de influencers. A conexão não dá à ORB permissão automática para publicar conteúdo no seu Instagram.</div>
+        </div>
+      </section>
+
       <section id="rankingSection" class="ranking-card">
         <div class="ranking-head">
           <div>
@@ -171,6 +224,7 @@
           <div>
             <b>Instagram verificado obrigatório para competir</b>
             <p>Seu XP continua sendo calculado normalmente, mas sua posição só entra no ranking depois que o perfil do Instagram estiver conectado e verificado pela ORB.</p>
+            <button id="connectInstagramRankBtn" class="btn btn-primary" style="margin-top:10px">Conectar Instagram</button>
           </div>
           <div class="lock-icon">🔒</div>
         </div>
@@ -344,6 +398,7 @@
     $('loginView').classList.add('hidden');
     $('appView').classList.remove('hidden');
     render();
+    instagramCallbackNotice();
   }
 
   async function load({ preflight=false } = {}){
@@ -475,6 +530,71 @@
     }
   }
 
+
+  function renderInstagram(instagram){
+    const ig=instagram||{};
+    const connected=Boolean(ig.verified && ig.username);
+    $('instagramDisconnected').classList.toggle('hidden',connected);
+    $('instagramConnected').classList.toggle('hidden',!connected);
+
+    if(connected){
+      const username=String(ig.username||'').replace(/^@/,'');
+      $('instagramUsername').textContent=`@${username}`;
+      $('instagramStatusPill').textContent='✓ Verificado';
+      $('instagramStatusPill').classList.add('purple');
+      $('instagramProfileLink').href=ig.profile_url || `https://www.instagram.com/${encodeURIComponent(username)}/`;
+      if(ig.avatar_url){
+        $('instagramAvatar').innerHTML=`<img src="${escapeHtml(ig.avatar_url)}" alt="@${escapeHtml(username)}" referrerpolicy="no-referrer">`;
+      }else{
+        $('instagramAvatar').textContent=(username.charAt(0)||'IG').toUpperCase();
+      }
+    }else{
+      $('instagramStatusPill').textContent='Não conectado';
+      $('instagramStatusPill').classList.remove('purple');
+      $('instagramAvatar').textContent='IG';
+    }
+  }
+
+  async function connectInstagram(){
+    const buttons=[$('connectInstagramBtn'),$('connectInstagramRankBtn'),$('reconnectInstagramBtn')].filter(Boolean);
+    buttons.forEach(b=>b.disabled=true);
+    try{
+      const cleanUrl=new URL(location.href);
+      ['instagram','user','reason','detail'].forEach(k=>cleanUrl.searchParams.delete(k));
+      cleanUrl.hash='';
+      const data=await invoke('orb-instagram-connect',{return_url:cleanUrl.toString()});
+      if(!data?.auth_url) throw new Error('O Instagram não devolveu a URL de conexão.');
+      location.href=data.auth_url;
+    }catch(e){
+      toast(e.message||'Não foi possível iniciar a conexão com o Instagram.');
+      buttons.forEach(b=>b.disabled=false);
+    }
+  }
+
+  function instagramCallbackNotice(){
+    const params=new URLSearchParams(location.search);
+    const status=params.get('instagram');
+    if(!status)return;
+    if(status==='connected'){
+      const user=params.get('user');
+      toast(user ? `Instagram @${user} conectado ✓` : 'Instagram conectado ✓');
+    }else{
+      const reason=params.get('reason')||'erro';
+      const labels={
+        invalid_or_expired_state:'A conexão expirou. Tente novamente.',
+        token_exchange_failed:'O Instagram recusou a autorização. Tente novamente.',
+        profile_fetch_failed:'Não consegui carregar o perfil autorizado.',
+        instagram_already_linked:'Esse Instagram já está vinculado a outro influencer.',
+        instagram_secret_missing:'A chave secreta do Instagram não foi encontrada no backend.',
+        access_denied:'A autorização foi cancelada.'
+      };
+      toast(labels[reason]||'Não foi possível conectar o Instagram.');
+    }
+    const clean=new URL(location.href);
+    ['instagram','user','reason','detail'].forEach(k=>clean.searchParams.delete(k));
+    history.replaceState({},'',clean.pathname+clean.search+clean.hash);
+  }
+
   function render(){
     if(!state)return;
     const i=state.influencer||{}, s=state.stats||{}, p=state.payout||{}, pix=state.pix||{};
@@ -490,6 +610,7 @@
     $('earnedMonth').textContent=`Este mês: ${money(s.earned_month)}`;
     $('code').textContent=i.code||'—';
     renderRanking(state.ranking||{});
+    renderInstagram(i.instagram||{});
 
     const base=(C.publicSiteUrl || location.origin).replace(/\/$/,'');
     const link=i.code ? `${base}/?ref=${encodeURIComponent(i.code)}` : '—';
@@ -581,6 +702,9 @@
     if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
   }));
 
+  $('connectInstagramBtn').addEventListener('click',connectInstagram);
+  $('connectInstagramRankBtn').addEventListener('click',connectInstagram);
+  $('reconnectInstagramBtn').addEventListener('click',connectInstagram);
   $('supportBtn').addEventListener('click',openSupport);
   $('topSupportBtn').addEventListener('click',openSupport);
   $('pixSupportBtn').addEventListener('click',openSupport);
@@ -601,6 +725,7 @@
         $('loginView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         render();
+        instagramCallbackNotice();
       }
     }
   })();
