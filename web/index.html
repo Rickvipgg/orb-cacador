@@ -333,6 +333,49 @@
     }
   }
 
+
+  async function saveShopeeAffiliateId(){
+    const input = $('affiliateIdInput');
+    const btn = $('saveAffiliateIdBtn');
+    const err = $('affiliateIdError');
+    const affiliateId = String(input?.value || '').trim();
+
+    if(err) err.textContent = '';
+    if(affiliateId.length < 2 || affiliateId.length > 100){
+      if(err) err.textContent = 'Digite um ID de afiliado Shopee válido.';
+      return;
+    }
+
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+    }
+
+    try{
+      const { data:{ user }, error:userError } = await sb.auth.getUser();
+      if(userError || !user?.id) throw new Error('Sessão inválida. Entre novamente.');
+
+      const { error:updateError } = await sb
+        .from('orb_profiles')
+        .update({
+          affiliate_id: affiliateId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if(updateError) throw updateError;
+
+      if(btn) btn.textContent = 'Salvo ✓';
+      await loadData();
+    }catch(e){
+      if(err) err.textContent = e?.message || 'Não foi possível salvar seu ID.';
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = 'Salvar e continuar';
+      }
+    }
+  }
+
   function renderAccessGate(access = {}){
     stopTrialCountdown();
     setDashboardVisible(false);
@@ -364,6 +407,44 @@
         <div class="gate-actions"><button id="gateLogout" class="gate-secondary">Sair e entrar novamente</button></div>
       </div>`;
       $('gateLogout')?.addEventListener('click', logout);
+      return;
+    }
+
+    if(access.profile_required || access.affiliate_configured === false){
+      const subId = String(access.sub_id || '').trim();
+
+      $('accessGate').innerHTML = `<div class="access-inner">
+        <span class="access-kicker">Configuração obrigatória</span>
+        <h2>Conecte seu ID de afiliado Shopee.</h2>
+        <p>A ORB precisa do seu ID para transformar cada oferta em um link que credita a comissão para <strong>a sua conta</strong>. Sem ele, o Caçador não libera o painel.</p>
+
+        <div class="field" style="max-width:520px;margin:22px auto 10px;text-align:left">
+          <label for="affiliateIdInput">ID de afiliado Shopee</label>
+          <input id="affiliateIdInput" type="text" maxlength="100" autocomplete="off" placeholder="Cole aqui seu ID de afiliado">
+        </div>
+
+        ${subId ? `<div class="gate-note" style="margin-top:8px">Seu Sub ID ORB já foi criado automaticamente: <strong>${esc(subId)}</strong></div>` : ''}
+
+        <div class="access-points" style="margin-top:20px">
+          <span class="access-point">✓ O ID fica salvo na sua conta ORB</span>
+          <span class="access-point">✓ Cada link será personalizado automaticamente</span>
+          <span class="access-point">✓ Você não precisa informar senha da Shopee</span>
+        </div>
+
+        <div class="gate-actions">
+          <button id="saveAffiliateIdBtn" class="gate-primary">Salvar e continuar</button>
+          <button id="gateLogout" class="gate-secondary">Sair</button>
+        </div>
+        <div id="affiliateIdError" class="gate-error"></div>
+        <div class="gate-note">O teste grátis só começa depois dessa configuração, então você não perde tempo de acesso.</div>
+      </div>`;
+
+      $('saveAffiliateIdBtn')?.addEventListener('click', saveShopeeAffiliateId);
+      $('affiliateIdInput')?.addEventListener('keydown', e => {
+        if(e.key === 'Enter') saveShopeeAffiliateId();
+      });
+      $('gateLogout')?.addEventListener('click', logout);
+      setTimeout(() => $('affiliateIdInput')?.focus(), 50);
       return;
     }
 
@@ -710,8 +791,13 @@
       $('refreshBtn').disabled = false;
 
       if(!data?.ok){
-        $('updated').innerHTML = '<span class="dot" style="background:#ea6a32"></span><span>Acesso ainda não liberado.</span>';
-        $('sideStatusText').textContent = 'Conta aguardando ativação.';
+        const needsAffiliateId = data?.error === 'affiliate_id_required' || data?.access?.profile_required;
+        $('updated').innerHTML = needsAffiliateId
+          ? '<span class="dot" style="background:#7c4dff"></span><span>Configure seu ID Shopee.</span>'
+          : '<span class="dot" style="background:#ea6a32"></span><span>Acesso ainda não liberado.</span>';
+        $('sideStatusText').textContent = needsAffiliateId
+          ? 'ID de afiliado obrigatório para liberar os links.'
+          : 'Conta aguardando ativação.';
         renderAccessGate(data?.access || {});
         return;
       }
