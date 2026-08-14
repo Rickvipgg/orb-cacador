@@ -12,7 +12,7 @@ import sqlite3
 import sys
 import urllib.request
 import webbrowser
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Evita erro de encoding de emojis/acentos em Windows e runners de nuvem.
@@ -101,8 +101,15 @@ def save_feed_state(state):
     with open(FEED_STATE_PATH, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
+def _parse_feed_timestamp_utc(value):
+    """Compatibilidade com timestamps antigos sem timezone, gerados pelo runner em UTC."""
+    dt = datetime.fromisoformat(str(value))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
 def evaluate_feed_freshness(feed_name, target, previous_state):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     file_hash = sha256_file(target)
     size = target.stat().st_size
 
@@ -119,12 +126,15 @@ def evaluate_feed_freshness(feed_name, target, previous_state):
         last_changed_at = now.isoformat(timespec="seconds")
         age_hours = 0.0
     else:
-        last_changed_at = old_changed_at or old.get("last_success_at") or now.isoformat(timespec="seconds")
+        raw_changed_at = old_changed_at or old.get("last_success_at")
+
         try:
-            changed_dt = datetime.fromisoformat(last_changed_at)
-            age_hours = max(0.0, (now - changed_dt).total_seconds() / 3600)
+            changed_dt = _parse_feed_timestamp_utc(raw_changed_at) if raw_changed_at else now
         except Exception:
-            age_hours = 0.0
+            changed_dt = now
+
+        last_changed_at = changed_dt.isoformat(timespec="seconds")
+        age_hours = max(0.0, (now - changed_dt).total_seconds() / 3600)
 
         if age_hours >= 36:
             status = "POSSIVELMENTE_DESATUALIZADO"
@@ -360,7 +370,7 @@ def write_csv(selected, path):
 
 def write_latest_json(selected, path, stats, feed_statuses):
     payload = {
-        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "stats": {**stats, "queue": len(selected)},
         "feeds": feed_statuses,
         "offers": [],
