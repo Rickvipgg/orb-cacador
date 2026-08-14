@@ -295,9 +295,19 @@
     if(err) err.textContent = '';
 
     try {
+      let referralCode = cleanRefCode(localStorage.getItem(REF_KEY));
+      let referralSource = localStorage.getItem(REF_SOURCE_KEY) || 'coupon';
+      try{
+        const { data:{ session } } = await sb.auth.getSession();
+        referralCode = referralCode || cleanRefCode(session?.user?.user_metadata?.referral_code);
+        referralSource = referralSource || String(session?.user?.user_metadata?.referral_source || 'coupon');
+      }catch(_){}
+
       const data = await invokeEdge('orb-start-trial', {
         turnstile_token: trialToken,
-        device_id: getDeviceId()
+        device_id: getDeviceId(),
+        referral_code: referralCode || null,
+        referral_source: referralSource === 'link' ? 'link' : 'coupon'
       });
 
       if(!data?.ok) throw new Error(data?.message || 'Não foi possível iniciar o teste.');
@@ -471,11 +481,25 @@
   async function claimPendingReferral(){
     const typed = cleanRefCode($('refCode')?.value);
     const stored = cleanRefCode(localStorage.getItem(REF_KEY));
-    const code = typed || stored;
+
+    let metaCode = '';
+    let metaSource = '';
+    try{
+      const { data:{ session } } = await sb.auth.getSession();
+      metaCode = cleanRefCode(session?.user?.user_metadata?.referral_code);
+      metaSource = String(session?.user?.user_metadata?.referral_source || '').toLowerCase();
+    }catch(_){}
+
+    const code = typed || stored || metaCode;
     if(!code) return {ok:true,skipped:true};
 
-    const source = typed && typed !== stored ? 'coupon' : (localStorage.getItem(REF_SOURCE_KEY) || 'coupon');
-    if(typed) rememberReferral(typed,'coupon');
+    const source = typed
+      ? 'coupon'
+      : (stored
+          ? (localStorage.getItem(REF_SOURCE_KEY) || 'coupon')
+          : (metaSource === 'link' ? 'link' : 'coupon'));
+
+    rememberReferral(code, source);
 
     const { data, error } = await sb.functions.invoke('orb-referral-claim',{body:{code,source}});
     if(error) return {ok:false,error};
@@ -610,7 +634,25 @@
     $('loginBtn').firstElementChild.textContent = authMode === 'signup' ? 'Criando...' : 'Entrando...';
 
     if(authMode === 'signup') {
-      const { data, error } = await sb.auth.signUp({ email, password });
+      const signupTyped = cleanRefCode($('refCode')?.value);
+      const signupStored = cleanRefCode(localStorage.getItem(REF_KEY));
+      const signupCode = signupTyped || signupStored;
+      const signupSource = signupTyped
+        ? 'coupon'
+        : (localStorage.getItem(REF_SOURCE_KEY) === 'link' ? 'link' : 'coupon');
+
+      if(signupCode) rememberReferral(signupCode, signupSource);
+
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: signupCode ? {
+            referral_code: signupCode,
+            referral_source: signupSource
+          } : {}
+        }
+      });
       $('loginBtn').disabled = false;
       $('loginBtn').firstElementChild.textContent = 'Criar conta';
       if(error){
@@ -625,7 +667,9 @@
           $('loginSuccess').textContent = 'Conta criada. Seu login funcionou; agora o acesso ao painel precisa estar autorizado.';
         }
       } else {
-        $('loginSuccess').textContent = 'Conta criada. Confirme o e-mail que o Supabase enviou e depois entre.';
+        $('loginSuccess').textContent = signupCode
+          ? 'Conta criada com cupom salvo. Confirme o e-mail e depois entre para liberar suas 48h.'
+          : 'Conta criada. Confirme o e-mail que a ORB enviou e depois entre.';
       }
       setTimeout(() => setAuthMode('login'), 2600);
       return;
