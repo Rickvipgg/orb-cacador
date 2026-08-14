@@ -143,6 +143,34 @@
   const readPosted = () => { try { return new Set(JSON.parse(localStorage.getItem(postedKey) || '[]')); } catch { return new Set(); } };
   const savePosted = (set) => localStorage.setItem(postedKey, JSON.stringify([...set]));
   const fmt = (n) => Number(n || 0).toLocaleString('pt-BR');
+  const ORB_TIME_ZONE = 'America/Sao_Paulo';
+
+  function parseOrbDate(value){
+    const raw = String(value || '').trim();
+    if(!raw) return null;
+
+    // Compatibilidade: dados antigos do runner vinham em UTC, mas sem Z/+00:00.
+    const hasZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(raw);
+    const normalized = hasZone ? raw : `${raw}Z`;
+
+    const d = new Date(normalized);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function formatOrbDate(value, fallback = '—'){
+    const d = parseOrbDate(value);
+    if(!d) return fallback;
+
+    return d.toLocaleString('pt-BR', {
+      timeZone: ORB_TIME_ZONE,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
 
   function updateGreeting(){
     const hour = new Date().getHours();
@@ -164,8 +192,34 @@
     const src = String(o.imagem || '').trim();
     return src ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.parentNode.querySelector('.fallback').style.display='block'" /><span class="fallback" style="display:none">◎</span>` : '<span class="fallback">◎</span>';
   }
-  function feedClass(f){ const s = String(f.status || '').toUpperCase(); return (s.includes('NOVO') || s.includes('OK') || s.includes('IGUAL')) ? 'ok' : (s.includes('ERRO') ? 'err' : ''); }
-  function feedText(f){ const s = String(f.status || '').toUpperCase(); if(s.includes('ERRO')) return 'Erro no download'; if(s.includes('NOVO')) return 'Feed novo detectado'; if(s.includes('IGUAL')) return 'Sem mudança'; return s || 'Status desconhecido'; }
+  function feedClass(f){
+    const s = String(f.status || '').toUpperCase();
+
+    if(s.includes('ERRO') || s.includes('POSSIVELMENTE_DESATUALIZADO')) return 'err';
+
+    if(
+      s.includes('NOVO') ||
+      s.includes('OK') ||
+      s.includes('IGUAL') ||
+      s.includes('SEM_MUDANCA') ||
+      s.includes('PRIMEIRA_CAPTURA')
+    ) return 'ok';
+
+    return '';
+  }
+
+  function feedText(f){
+    const s = String(f.status || '').toUpperCase();
+
+    if(s.includes('ERRO')) return 'Erro no download';
+    if(s.includes('POSSIVELMENTE_DESATUALIZADO')) return 'Atenção • feed sem alteração há muito tempo';
+    if(s.includes('PRIMEIRA_CAPTURA')) return 'Online • primeira captura concluída';
+    if(s.includes('NOVO')) return 'Online • novo feed detectado';
+    if(s.includes('SEM_MUDANCA') || s.includes('IGUAL')) return 'Online • sem alteração';
+    if(s.includes('OK')) return 'Online';
+
+    return s || 'Status desconhecido';
+  }
 
   function setAuthMode(mode){
     authMode = mode;
@@ -247,8 +301,7 @@
     offers = latestPayload.offers || [];
     const stats = latestPayload.stats || {};
     $('mRows').textContent = fmt(stats.total_rows); $('mUnique').textContent = fmt(stats.unique_items); $('mCandidates').textContent = fmt(stats.candidates); $('mQueue').textContent = fmt(stats.queue ?? offers.length);
-    const dt = latestPayload.generated_at ? new Date(latestPayload.generated_at) : null;
-    const dtText = dt && !Number.isNaN(dt.getTime()) ? dt.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) : 'agora';
+    const dtText = formatOrbDate(latestPayload.generated_at, 'agora');
     $('updated').innerHTML = `<span class="dot"></span><span>Atualizado em ${esc(dtText)}</span>`;
     $('sideStatusText').textContent = `Última fila recebida em ${dtText}.`;
     renderFeeds(latestPayload.feeds || []);
@@ -257,10 +310,34 @@
     render();
   }
   function renderFeeds(list){
-    if(!list.length){ $('feeds').innerHTML = '<div class="muted">Nenhum status de feed recebido.</div>'; $('feedSummary').textContent = '0 feeds'; return; }
-    const ok = list.filter(f => feedClass(f)==='ok').length;
+    if(!list.length){
+      $('feeds').innerHTML = '<div class="muted">Nenhum status de feed recebido.</div>';
+      $('feedSummary').textContent = '0 feeds';
+      return;
+    }
+
+    const ok = list.filter(f => feedClass(f) === 'ok').length;
     $('feedSummary').textContent = `${ok}/${list.length} operando`;
-    $('feeds').innerHTML = list.map(f => `<div class="feed ${feedClass(f)}"><div class="feed-head"><span class="feed-status-dot"></span>${esc(f.nome || 'Feed')}</div><div class="feed-meta">${esc(feedText(f))}<br>Última mudança: ${esc(f.last_changed_at || '—')}</div></div>`).join('');
+
+    $('feeds').innerHTML = list.map(f => {
+      const checked = formatOrbDate(f.last_success_at);
+      const changed = formatOrbDate(f.last_changed_at);
+      const age = Number(f.age_hours);
+
+      const ageText = Number.isFinite(age)
+        ? `<br>Sem alteração há: ${esc(age.toLocaleString('pt-BR', { maximumFractionDigits: 1 }))}h`
+        : '';
+
+      return `<div class="feed ${feedClass(f)}">
+        <div class="feed-head"><span class="feed-status-dot"></span>${esc(f.nome || 'Feed')}</div>
+        <div class="feed-meta">
+          ${esc(feedText(f))}
+          <br>Última checagem: ${esc(checked)}
+          <br>Última mudança: ${esc(changed)}
+          ${ageText}
+        </div>
+      </div>`;
+    }).join('');
   }
   function render(){
     const q = $('search').value.toLowerCase().trim(), c = $('cat').value, posted = readPosted();
