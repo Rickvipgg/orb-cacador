@@ -66,10 +66,33 @@
     .toast{position:fixed;right:18px;bottom:18px;background:#f3efff;color:#18151f;padding:11px 14px;border-radius:12px;font-size:11px;font-weight:850;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;z-index:50}.toast.show{opacity:1;transform:none}
     .modal{position:fixed;inset:0;background:rgba(3,3,6,.72);backdrop-filter:blur(8px);z-index:60;display:grid;place-items:center;padding:18px}.modal-card{width:min(100%,420px);background:#121119;border:1px solid #292636;border-radius:22px;padding:22px;box-shadow:var(--shadow)}.modal-card h3{margin:0 0 9px;font-size:20px}.modal-card p{font-size:11px;line-height:1.6;color:#8b8796}.modal-actions{display:flex;gap:8px;margin-top:18px}.modal-actions .btn{flex:1}
 
+
+    /* RANKING GLOBAL */
+    .ranking-card{margin:13px 0;background:linear-gradient(145deg,#15131e,#0f0e15);border:1px solid #29243a;border-radius:22px;padding:18px;position:relative;overflow:hidden}
+    .ranking-card:before{content:"";position:absolute;width:360px;height:360px;border-radius:50%;right:-180px;top:-210px;background:radial-gradient(circle,rgba(139,92,246,.22),transparent 68%);pointer-events:none}
+    .ranking-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;position:relative;z-index:2}
+    .ranking-head h2{font-size:18px;letter-spacing:-.025em;margin:0 0 5px}.ranking-head p{margin:0;color:#817d8e;font-size:10px;line-height:1.45}
+    .rank-rules{display:flex;gap:6px;flex-wrap:wrap;margin:13px 0 4px;position:relative;z-index:2}.rank-rule{border:1px solid #302a43;background:#1a1724;color:#b5acc8;border-radius:999px;padding:7px 9px;font-size:9px;font-weight:850}.rank-rule strong{color:#fff}
+    .rank-lock{margin-top:14px;border:1px dashed #393149;background:rgba(28,24,38,.66);border-radius:16px;padding:14px;display:flex;justify-content:space-between;gap:14px;align-items:center;position:relative;z-index:2}
+    .rank-lock b{display:block;font-size:12px;margin-bottom:4px}.rank-lock p{margin:0;color:#85808e;font-size:10px;line-height:1.45}.rank-lock .lock-icon{font-size:22px}
+    .rank-self{display:grid;grid-template-columns:1.25fr repeat(3,minmax(0,1fr));gap:8px;margin:14px 0;position:relative;z-index:2}
+    .rank-self-main,.rank-self-stat{border:1px solid #292537;background:#13121a;border-radius:15px;padding:12px}
+    .rank-self-main small,.rank-self-stat small{display:block;color:#716d7b;font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+    .rank-self-main b{font-size:24px;letter-spacing:-.04em}.rank-self-main span{display:block;color:#8c8795;font-size:9px;margin-top:4px}
+    .rank-self-stat b{font-size:18px}.rank-self-stat span{display:block;color:#797583;font-size:8px;margin-top:4px}
+    .podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:8px;align-items:end;margin:17px 0 10px;position:relative;z-index:2}
+    .podium-place{border:1px solid #2a2638;background:#121119;border-radius:18px;padding:13px;text-align:center;min-height:164px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+    .podium-place.first{min-height:188px;border-color:#51406f;background:linear-gradient(160deg,#211a31,#121119);box-shadow:0 14px 40px rgba(81,55,126,.16)}
+    .podium-medal{font-size:21px;margin-bottom:8px}.rank-avatar{width:48px;height:48px;border-radius:50%;border:2px solid #302a40;background:#211e2c;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:950;color:#b799ff;overflow:hidden}
+    .podium-place.first .rank-avatar{width:58px;height:58px}.rank-user{font-size:11px;font-weight:900;margin-top:8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rank-xp{font-size:18px;font-weight:950;letter-spacing:-.03em;margin-top:5px}.rank-break{font-size:8px;color:#797583;margin-top:4px}.rank-bonus{margin-top:8px;background:#24202f;border:1px solid #39304b;color:#c9b4ff;border-radius:999px;font-size:8px;font-weight:900;padding:5px 7px}
+    .rank-list{display:grid;gap:6px;position:relative;z-index:2}.rank-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:10px;align-items:center;border:1px solid #24212f;background:#121119;border-radius:13px;padding:9px 11px}.rank-pos{font-size:12px;font-weight:950;color:#8d8797}.rank-person{display:flex;align-items:center;gap:9px;min-width:0}.rank-person .rank-avatar{width:34px;height:34px;font-size:11px}.rank-person-info{min-width:0}.rank-person-info b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-person-info span{display:block;color:#706c79;font-size:8px;margin-top:2px}.rank-row-xp{font-size:12px;font-weight:950;white-space:nowrap}.rank-row-prize{font-size:8px;font-weight:900;color:#bda9ef;white-space:nowrap}
+    .rank-own-out{margin-top:9px;border:1px solid #4b3969;background:linear-gradient(135deg,#1d172a,#131019);border-radius:15px;padding:12px;display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:10px;position:relative;z-index:2}.rank-own-out .rank-pos{font-size:20px;color:#c7afff}.rank-own-out b{font-size:10px}.rank-own-out span{display:block;color:#898391;font-size:8px;margin-top:3px}.rank-own-out strong{font-size:15px}
+    .rank-empty{border:1px dashed #312c3e;border-radius:15px;padding:22px;text-align:center;color:#797583;font-size:10px;position:relative;z-index:2;margin-top:14px}
+
     @media(max-width:1180px){.metrics{grid-template-columns:repeat(3,1fr)}.metric.primary{grid-column:span 1}.grid2{grid-template-columns:1fr}.app{grid-template-columns:190px minmax(0,1fr)}}
     @media(max-width:760px){
       .auth{display:block;padding:0}.auth-art{display:none}.auth-form-wrap{min-height:100svh;padding:24px}.auth-card:before{content:"ORB";display:flex;align-items:center;font-size:25px;font-weight:950;letter-spacing:-.04em;margin-bottom:35px}
-      .app{display:block;width:100%;padding:0 14px 30px}.side{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;padding:14px 0 3px}.mobile-head .brand{font-size:21px}.mobile-head .orb-mark{transform:scale(.82);transform-origin:left center}.topbar{min-height:78px}.topbar h1{font-size:24px}.top-actions .btn span{display:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{min-height:112px;padding:13px}.metric.primary{grid-column:1/-1;min-height:120px}.metric b{font-size:22px;margin-top:18px}.metric.primary b{font-size:30px}.card{padding:14px;border-radius:18px}.grid2{gap:9px}.form-row{grid-template-columns:1fr}.chart{gap:4px;height:150px}.copy-line{align-items:stretch;flex-direction:column}.copy-line .btn{width:100%}.rule-grid{gap:7px}.table-wrap{margin:0 -14px;padding:0 14px}.toast{left:14px;right:14px;text-align:center}.modal-actions{flex-direction:column}
+      .app{display:block;width:100%;padding:0 14px 30px}.side{display:none}.rank-self{grid-template-columns:repeat(2,1fr)}.rank-self-main{grid-column:1/-1}.podium{grid-template-columns:1fr;align-items:stretch}.podium-place.first{order:-1}.podium-place,.podium-place.first{min-height:145px}.rank-row{grid-template-columns:30px minmax(0,1fr) auto}.rank-row-prize{display:none}.ranking-head{display:block}.ranking-head .pill{margin-top:9px}.rank-lock{align-items:flex-start}.mobile-head{display:flex;align-items:center;justify-content:space-between;padding:14px 0 3px}.mobile-head .brand{font-size:21px}.mobile-head .orb-mark{transform:scale(.82);transform-origin:left center}.topbar{min-height:78px}.topbar h1{font-size:24px}.top-actions .btn span{display:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{min-height:112px;padding:13px}.metric.primary{grid-column:1/-1;min-height:120px}.metric b{font-size:22px;margin-top:18px}.metric.primary b{font-size:30px}.card{padding:14px;border-radius:18px}.grid2{gap:9px}.form-row{grid-template-columns:1fr}.chart{gap:4px;height:150px}.copy-line{align-items:stretch;flex-direction:column}.copy-line .btn{width:100%}.rule-grid{gap:7px}.table-wrap{margin:0 -14px;padding:0 14px}.toast{left:14px;right:14px;text-align:center}.modal-actions{flex-direction:column}
     }
   </style>
 </head>
@@ -102,6 +125,7 @@
       <div class="brand"><span class="orb-mark"></span> ORB</div>
       <div class="side-title">Influencer</div>
       <button class="side-item active" data-scroll="overview"><span class="side-dot"></span> Visão geral</button>
+      <button class="side-item" data-scroll="rankingSection"><span class="side-dot"></span> Ranking Global</button>
       <button class="side-item" data-scroll="referralsSection"><span class="side-dot"></span> Indicações</button>
       <button class="side-item" data-scroll="paymentsSection"><span class="side-dot"></span> Pagamentos</button>
       <div class="side-bottom">
@@ -124,6 +148,48 @@
         <div class="metric"><small>Cliques</small><b id="clicks">0</b><em>no seu link</em></div>
         <div class="metric"><small>Conversão</small><b id="conversion">0%</b><em>cadastro → ativo</em></div>
         <div class="metric"><small>Total recebido</small><b id="paidTotal">R$ 0,00</b><em>comissões pagas</em></div>
+      </section>
+
+      <section id="rankingSection" class="ranking-card">
+        <div class="ranking-head">
+          <div>
+            <h2>🏆 Ranking Global ORB</h2>
+            <p id="rankingMonth">Campeonato mensal • calculado apenas com pagamentos reais aprovados</p>
+          </div>
+          <span class="pill purple">Top 10 global</span>
+        </div>
+
+        <div class="rank-rules">
+          <span class="rank-rule"><strong>+100 XP</strong> nova assinatura paga</span>
+          <span class="rank-rule"><strong>+50 XP</strong> renovação paga</span>
+          <span class="rank-rule">🥇 <strong>R$75</strong></span>
+          <span class="rank-rule">🥈 <strong>R$40</strong></span>
+          <span class="rank-rule">🥉 <strong>R$25</strong></span>
+        </div>
+
+        <div id="rankingLock" class="rank-lock hidden">
+          <div>
+            <b>Instagram verificado obrigatório para competir</b>
+            <p>Seu XP continua sendo calculado normalmente, mas sua posição só entra no ranking depois que o perfil do Instagram estiver conectado e verificado pela ORB.</p>
+          </div>
+          <div class="lock-icon">🔒</div>
+        </div>
+
+        <div class="rank-self">
+          <div class="rank-self-main">
+            <small>Sua posição este mês</small>
+            <b id="myRank">—</b>
+            <span id="myRankHint">Aguardando dados...</span>
+          </div>
+          <div class="rank-self-stat"><small>Seu XP</small><b id="myXp">0 XP</b><span id="myXpDetail">0 novas • 0 renovações</span></div>
+          <div class="rank-self-stat"><small>Para Top 10</small><b id="xpTop10">—</b><span>XP para ultrapassar</span></div>
+          <div class="rank-self-stat"><small>Para o pódio</small><b id="xpPodium">—</b><span>XP para ultrapassar o 3º</span></div>
+        </div>
+
+        <div id="podium" class="podium hidden"></div>
+        <div id="rankList" class="rank-list"></div>
+        <div id="myOutsideRank" class="rank-own-out hidden"></div>
+        <div id="rankEmpty" class="rank-empty hidden">Ainda não existem influencers com Instagram verificado no ranking deste mês.</div>
       </section>
 
       <section class="grid2">
@@ -318,6 +384,97 @@
     }
   }
 
+
+  function rankAvatar(row, extraClass=''){
+    const username=String(row?.username||'').replace(/^@/,'');
+    const initial=(username.charAt(0)||'?').toUpperCase();
+    const cls=`rank-avatar ${extraClass}`.trim();
+    if(row?.avatar_url){
+      return `<div class="${cls}"><img src="${escapeHtml(row.avatar_url)}" alt="@${escapeHtml(username)}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer"></div>`;
+    }
+    return `<div class="${cls}">${escapeHtml(initial)}</div>`;
+  }
+
+  function renderRanking(ranking){
+    const r=ranking||{}, self=r.self||{}, rules=r.rules||{}, top=Array.isArray(r.top10)?r.top10:[];
+    $('rankingMonth').textContent=`${r.month_label || 'Mês atual'} • +${Number(rules.first_payment_xp||100)} XP nova assinatura • +${Number(rules.recurring_payment_xp||50)} XP renovação`;
+
+    $('myXp').textContent=`${num(self.xp||0)} XP`;
+    $('myXpDetail').textContent=`${num(self.first_payments||0)} novas • ${num(self.renewals||0)} renovações`;
+
+    const eligible=Boolean(r.eligible);
+    $('rankingLock').classList.toggle('hidden',eligible);
+
+    if(eligible && self.position){
+      $('myRank').textContent=`#${self.position}`;
+      $('myRankHint').textContent=self.position<=3
+        ? 'Você está no pódio 🔥'
+        : self.position<=10
+          ? 'Você está no Top 10 global'
+          : 'Sua posição global no mês';
+    }else{
+      $('myRank').textContent='🔒';
+      $('myRankHint').textContent='Conecte e verifique seu Instagram para entrar';
+    }
+
+    $('xpTop10').textContent=eligible
+      ? (Number(self.xp_to_top10||0)===0 ? 'DENTRO' : `+${num(self.xp_to_top10)} XP`)
+      : '—';
+    $('xpPodium').textContent=eligible
+      ? (Number(self.xp_to_podium||0)===0 && Number(self.position||99)<=3 ? 'PÓDIO' : `+${num(self.xp_to_podium||0)} XP`)
+      : '—';
+
+    $('rankEmpty').classList.toggle('hidden',top.length>0);
+
+    const top3=top.slice(0,3);
+    if(top3.length){
+      const byPosition=new Map(top3.map(x=>[Number(x.position),x]));
+      const order=[2,1,3].filter(pos=>byPosition.has(pos));
+      $('podium').innerHTML=order.map(pos=>{
+        const x=byPosition.get(pos);
+        const medal=pos===1?'🥇':pos===2?'🥈':'🥉';
+        const cls=pos===1?'podium-place first':'podium-place';
+        return `<div class="${cls}">
+          <div class="podium-medal">${medal}</div>
+          ${rankAvatar(x)}
+          <div class="rank-user">@${escapeHtml(String(x.username||'').replace(/^@/,''))}</div>
+          <div class="rank-xp">${num(x.xp)} XP</div>
+          <div class="rank-break">${num(x.first_payments)} novas • ${num(x.renewals)} renovações</div>
+          <div class="rank-bonus">+ ${money(x.bonus)} de bônus</div>
+        </div>`;
+      }).join('');
+      $('podium').classList.remove('hidden');
+    }else{
+      $('podium').innerHTML='';
+      $('podium').classList.add('hidden');
+    }
+
+    const rest=top.filter(x=>Number(x.position)>=4);
+    $('rankList').innerHTML=rest.map(x=>`<div class="rank-row">
+      <div class="rank-pos">#${num(x.position)}</div>
+      <div class="rank-person">
+        ${rankAvatar(x)}
+        <div class="rank-person-info">
+          <b>@${escapeHtml(String(x.username||'').replace(/^@/,''))}</b>
+          <span>${num(x.first_payments)} novas • ${num(x.renewals)} renovações</span>
+        </div>
+      </div>
+      <div class="rank-row-xp">${num(x.xp)} XP</div>
+      <div class="rank-row-prize">${Number(x.bonus||0)>0?`+ ${money(x.bonus)}`:''}</div>
+    </div>`).join('');
+
+    if(eligible && Number(self.position||0)>10){
+      $('myOutsideRank').innerHTML=`
+        <div class="rank-pos">#${num(self.position)}</div>
+        <div><b>@${escapeHtml(String(self.username||'').replace(/^@/,''))}</b><span>Sua posição atual • fora do Top 10</span></div>
+        <strong>${num(self.xp||0)} XP</strong>`;
+      $('myOutsideRank').classList.remove('hidden');
+    }else{
+      $('myOutsideRank').classList.add('hidden');
+      $('myOutsideRank').innerHTML='';
+    }
+  }
+
   function render(){
     if(!state)return;
     const i=state.influencer||{}, s=state.stats||{}, p=state.payout||{}, pix=state.pix||{};
@@ -332,6 +489,7 @@
     $('paidTotal').textContent=money(p.paid_total);
     $('earnedMonth').textContent=`Este mês: ${money(s.earned_month)}`;
     $('code').textContent=i.code||'—';
+    renderRanking(state.ranking||{});
 
     const base=(C.publicSiteUrl || location.origin).replace(/\/$/,'');
     const link=i.code ? `${base}/?ref=${encodeURIComponent(i.code)}` : '—';
