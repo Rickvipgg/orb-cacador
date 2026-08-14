@@ -9,6 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
   <style>
     :root{
       --bg:#f6f5fb;--surface:#fff;--surface-2:#f0eff6;--ink:#15151b;--muted:#777684;
@@ -43,10 +44,31 @@
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.offer-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;display:grid;grid-template-columns:118px minmax(0,1fr);gap:15px;transition:.18s;min-height:230px}.offer-card:hover{transform:translateY(-2px);box-shadow:0 13px 34px rgba(32,25,61,.07);border-color:#ddd9eb}.offer-card.done{opacity:.48;filter:saturate(.55)}.offer-card.done:hover{transform:none;box-shadow:none}.product-image{width:118px;height:118px;border-radius:16px;background:#f1f0f5;overflow:hidden;display:grid;place-items:center;align-self:start;position:relative}.product-image img{width:100%;height:100%;object-fit:cover}.product-image .fallback{font-size:28px;color:#aaa}.time-badge{position:absolute;bottom:7px;left:7px;background:rgba(20,20,25,.84);backdrop-filter:blur(8px);color:#fff;border-radius:8px;padding:5px 7px;font-size:10px;font-weight:850}.offer-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.signal{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#f3edff;color:#7041d9;padding:6px 9px;font-size:10px;font-weight:900;letter-spacing:.02em}.score{font-size:11px;font-weight:900;background:#fff3e9;color:#ca5622;padding:6px 8px;border-radius:999px}.offer-title{font-size:15px;line-height:1.34;font-weight:820;margin:10px 0 8px;letter-spacing:-.013em}.meta{display:flex;gap:5px;flex-wrap:wrap}.pill{font-size:9px;color:#6d6b78;background:#f4f3f7;border-radius:999px;padding:5px 7px;white-space:nowrap}.pill.hot{background:#ecfbf3;color:#14784e}.price{display:flex;align-items:baseline;gap:8px;margin:13px 0 11px;flex-wrap:wrap}.old{text-decoration:line-through;color:#aaa8b1;font-size:11px}.now{font-size:23px;font-weight:930;letter-spacing:-.04em}.discount{background:#ddf8e8;color:#117548;border-radius:8px;padding:4px 6px;font-size:10px;font-weight:900}.actions{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:7px}.action{height:38px;border:0;border-radius:11px;font-size:10px;font-weight:900;cursor:pointer;transition:.15s}.copy{background:#19191f;color:#fff}.copy:hover{background:#2b2a32}.open{background:#f0eff5;color:#2c2b34}.posted{background:#f4f2fb;color:#6e45cb}.posted.is-done{background:#e7f7ef;color:#15774e}.empty{grid-column:1/-1;background:#fff;border:1px dashed #d8d5e3;border-radius:22px;padding:50px;text-align:center;color:var(--muted)}.empty b{display:block;color:var(--ink);margin-bottom:5px}
     .skeleton{height:230px;border-radius:22px;background:linear-gradient(100deg,#eeedf3 20%,#f8f7fb 40%,#eeedf3 60%);background-size:200% 100%;animation:shimmer 1.2s linear infinite}@keyframes shimmer{to{background-position-x:-200%}}
     .toast{position:fixed;right:22px;bottom:22px;background:#17171c;color:#fff;border-radius:14px;padding:12px 15px;font-size:12px;font-weight:760;box-shadow:0 16px 46px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;z-index:30}.toast.show{opacity:1;transform:none}
+
+    .trial-badge{height:42px;border:1px solid #ddd7ff;background:#f5f1ff;color:#6540c7;border-radius:13px;padding:0 13px;display:flex;align-items:center;font-size:11px;font-weight:900;white-space:nowrap}
+    .access-gate{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:28px;margin:13px 0 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .access-gate:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-130px;top:-150px;background:radial-gradient(circle,rgba(124,77,255,.17),transparent 68%);pointer-events:none}
+    .access-inner{position:relative;z-index:2;max-width:680px}
+    .access-kicker{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:#6d45cc;background:#f3edff;border-radius:999px;padding:7px 10px}
+    .access-kicker.bonus{background:#ece9ff;color:#5635c7}
+    .access-gate h2{font-size:31px;letter-spacing:-.045em;margin:14px 0 8px}
+    .access-gate p{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 18px;max-width:590px}
+    .access-points{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+    .access-point{font-size:10px;font-weight:800;background:#f4f3f8;color:#555360;border-radius:999px;padding:7px 9px}
+    .access-point.bonus{background:#f0ebff;color:#6241c7}
+    .turnstile-wrap{min-height:66px;display:flex;align-items:center;margin:4px 0 12px}
+    .gate-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+    .gate-primary{height:46px;border:0;border-radius:13px;background:#17171c;color:#fff;padding:0 17px;font-weight:880;cursor:pointer}
+    .gate-primary:disabled{opacity:.48;cursor:not-allowed}
+    .gate-secondary{height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;color:#2f2e36;padding:0 15px;font-weight:820;cursor:pointer}
+    .gate-error{min-height:18px;color:#b42318;font-size:12px;margin-top:10px}
+    .gate-note{font-size:10px;color:#97959f;margin-top:10px}
+
     .mobile-head{display:none}
     @media(max-width:1050px){.app-shell{grid-template-columns:190px minmax(0,1fr)}.health-row{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.offer-card{min-height:216px}}
     @media(max-width:760px){
       .auth-shell{display:block;padding:0}.auth-story{display:none}.auth-form-wrap{min-height:100svh;padding:25px}.login-card:before{content:"";display:block;width:72px;height:72px;margin-bottom:28px;background:url('./favicon.svg') center/contain no-repeat}
+      .access-gate{padding:20px;border-radius:20px}.access-gate h2{font-size:26px}.gate-actions{display:grid;grid-template-columns:1fr}.gate-primary,.gate-secondary{width:100%}.trial-badge{height:38px;padding:0 10px;font-size:10px}
       .app-shell{display:block;padding:0 12px 30px}.sidebar{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;padding:15px 2px 4px}.mobile-head .brand{font-size:22px}.mobile-head .orb-mark{transform:scale(.85);transform-origin:left center}.mobile-logout{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 10px;font-weight:800;font-size:11px}.topbar{height:auto;padding:12px 2px 6px}.headline h1{font-size:24px}.top-actions .icon-btn span.label{display:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{min-height:108px;padding:14px}.metric b{font-size:23px}.metric-icon{margin-bottom:13px}.health-row{display:block}.quick-card{display:none}.health-card{padding:13px;margin-bottom:8px}.feeds{margin-right:-13px}.toolbar{top:0;grid-template-columns:1fr auto;padding:8px 0}.toolbar select{grid-column:1/2}.search-wrap{grid-column:1/3}.filter-btn{grid-column:2/3;grid-row:2}.grid{gap:9px}.offer-card{grid-template-columns:86px minmax(0,1fr);gap:11px;padding:11px;border-radius:18px;min-height:0}.product-image{width:86px;height:86px;border-radius:13px}.offer-title{font-size:13px;margin:8px 0 7px}.now{font-size:20px}.actions{grid-column:1/-1;grid-template-columns:1.25fr .8fr .8fr}.action{height:40px}.meta .pill:nth-child(n+4){display:none}.toast{left:12px;right:12px;bottom:14px;text-align:center}.result-row{margin-top:3px}
     }
   </style>
@@ -86,6 +108,7 @@
       <div class="nav-title">Painel</div>
       <button class="nav-item active"><span class="nav-dot"></span> Ofertas</button>
       <button class="nav-item" id="sideRefresh"><span class="nav-dot"></span> Atualizar dados</button>
+      <button class="nav-item" id="beInfluencerBtn"><span class="nav-dot"></span> Quero ser influencer</button>
       <div class="side-status">
         <div class="status-line"><span class="online-dot"></span> Caçador online</div>
         <p id="sideStatusText">Aguardando última atualização.</p>
@@ -97,8 +120,10 @@
       <div class="mobile-head"><div class="brand"><span class="orb-mark"></span> ORB</div><button id="mobileLogout" class="mobile-logout">Sair</button></div>
       <header class="topbar">
         <div class="headline"><h1 id="greeting">Olá 👋</h1><div id="updated" class="updated"><span class="dot"></span><span>Carregando dados...</span></div></div>
-        <div class="top-actions"><button id="refreshBtn" class="icon-btn"><span>↻</span><span class="label">Atualizar</span></button></div>
+        <div class="top-actions"><div id="trialBadge" class="trial-badge hidden"></div><button id="beInfluencerTopBtn" class="icon-btn"><span>✦</span><span class="label">Ser influencer</span></button><button id="refreshBtn" class="icon-btn"><span>↻</span><span class="label">Atualizar</span></button></div>
       </header>
+
+      <section id="accessGate" class="access-gate hidden"></section>
 
       <section class="metrics">
         <div class="metric dark"><div class="metric-icon">◎</div><b id="mRows">—</b><small>linhas analisadas</small></div>
@@ -131,6 +156,9 @@
   const loginView = $('loginView'), appView = $('appView');
   const toastEl = $('toast');
   let offers = [], latestPayload = null, onlyPending = false, authMode = 'login';
+  const TURNSTILE_SITE_KEY = '0x4AAAAAAEPQkxSrUS8iNc2J';
+  const deviceKey = 'orb-device-id-v1';
+  let trialToken = '', trialWidgetId = null, trialTimer = null;
 
   if (!C.supabaseUrl || !C.supabasePublishableKey) {
     $('loginError').textContent = 'Configure web/config.js antes de publicar.';
@@ -139,6 +167,262 @@
   }
 
   const sb = supabase.createClient(C.supabaseUrl, C.supabasePublishableKey);
+
+  function getDeviceId(){
+    let id = localStorage.getItem(deviceKey);
+    if(id && id.length >= 16) return id;
+    try { id = crypto.randomUUID(); }
+    catch { id = `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`; }
+    localStorage.setItem(deviceKey, id);
+    return id;
+  }
+
+  async function invokeEdge(name, body = {}){
+    const { data, error } = await sb.functions.invoke(name, { body });
+    if(!error) return data;
+
+    let detail = null;
+    try {
+      const ctx = error.context;
+      if(ctx && typeof ctx.clone === 'function') detail = await ctx.clone().json();
+      else if(ctx && typeof ctx.json === 'function') detail = await ctx.json();
+    } catch {}
+
+    const message = detail?.message || data?.message || error.message || 'Não foi possível concluir a operação.';
+    const e = new Error(message);
+    e.code = detail?.error || '';
+    throw e;
+  }
+
+  function setDashboardVisible(visible){
+    document.querySelectorAll('.metrics,.health-row,.toolbar,.result-row').forEach(el => el.classList.toggle('hidden', !visible));
+    $('grid').classList.toggle('hidden', !visible);
+    $('accessGate').classList.toggle('hidden', visible);
+  }
+
+  function stopTrialCountdown(){
+    if(trialTimer){ clearInterval(trialTimer); trialTimer = null; }
+    $('trialBadge').classList.add('hidden');
+    $('trialBadge').textContent = '';
+  }
+
+  function startTrialCountdown(endsAt, totalHours = 24){
+    stopTrialCountdown();
+    const end = Date.parse(String(endsAt || ''));
+    if(!Number.isFinite(end)) return;
+
+    const tick = () => {
+      const left = end - Date.now();
+      if(left <= 0){
+        stopTrialCountdown();
+        loadData();
+        return;
+      }
+
+      const totalMin = Math.ceil(left / 60000);
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      const prefix = Number(totalHours) > 24 ? 'Teste 48h' : 'Teste 24h';
+      $('trialBadge').textContent = `${prefix} • ${h}h ${String(m).padStart(2,'0')}m`;
+      $('trialBadge').classList.remove('hidden');
+    };
+
+    tick();
+    trialTimer = setInterval(tick, 30000);
+  }
+
+  function resetTurnstile(){
+    trialToken = '';
+    try {
+      if(trialWidgetId !== null && window.turnstile) window.turnstile.remove(trialWidgetId);
+    } catch {}
+    trialWidgetId = null;
+  }
+
+  function renderTurnstile(attempt = 0){
+    const box = $('turnstileBox');
+    if(!box) return;
+
+    if(!window.turnstile){
+      if(attempt < 80) setTimeout(() => renderTurnstile(attempt + 1), 100);
+      else box.innerHTML = '<span class="muted">Não foi possível carregar a verificação. Atualize a página.</span>';
+      return;
+    }
+
+    resetTurnstile();
+
+    try {
+      trialWidgetId = window.turnstile.render(box, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'light',
+        size: 'normal',
+        callback: (token) => {
+          trialToken = token;
+          const btn = $('startTrialBtn');
+          if(btn) btn.disabled = false;
+          const err = $('gateError');
+          if(err) err.textContent = '';
+        },
+        'expired-callback': () => {
+          trialToken = '';
+          const btn = $('startTrialBtn');
+          if(btn) btn.disabled = true;
+        },
+        'error-callback': () => {
+          trialToken = '';
+          const btn = $('startTrialBtn');
+          if(btn) btn.disabled = true;
+          const err = $('gateError');
+          if(err) err.textContent = 'Falha na verificação de segurança. Tente novamente.';
+        }
+      });
+    } catch {
+      box.innerHTML = '<span class="muted">Não foi possível abrir a verificação. Atualize a página.</span>';
+    }
+  }
+
+  async function startFreeTrial(){
+    const btn = $('startTrialBtn');
+    const err = $('gateError');
+
+    if(!trialToken){
+      if(err) err.textContent = 'Conclua a verificação de segurança primeiro.';
+      return;
+    }
+
+    const hours = Number(btn?.dataset?.hours || 24);
+    if(btn){ btn.disabled = true; btn.textContent = `Ativando ${hours}h grátis...`; }
+    if(err) err.textContent = '';
+
+    try {
+      const data = await invokeEdge('orb-start-trial', {
+        turnstile_token: trialToken,
+        device_id: getDeviceId()
+      });
+
+      if(!data?.ok) throw new Error(data?.message || 'Não foi possível iniciar o teste.');
+
+      const activatedHours = Number(data.hours || hours || 24);
+      toast(
+        activatedHours > 24
+          ? `Bônus de influencer aplicado: ${activatedHours}h grátis liberadas.`
+          : `${activatedHours}h grátis liberadas.`
+      );
+
+      await loadData();
+    } catch(e) {
+      if(err) err.textContent = e.message || 'Não foi possível iniciar o teste.';
+      if(btn){
+        btn.disabled = true;
+        btn.textContent = `Ativar ${hours}h grátis`;
+      }
+      if(window.turnstile && trialWidgetId !== null){
+        try { window.turnstile.reset(trialWidgetId); } catch {}
+      }
+      trialToken = '';
+    }
+  }
+
+  function renderAccessGate(access = {}){
+    stopTrialCountdown();
+    setDashboardVisible(false);
+    resetTurnstile();
+    $('refreshBtn').disabled = false;
+
+    const emailVerified = Boolean(access.email_verified);
+    const trialAvailable = Boolean(access.trial_available);
+    const trialUsed = Boolean(access.trial_used);
+    const blocked = access.status === 'blocked';
+    const referralBonus = Boolean(access.referral_bonus);
+    const totalHours = Math.max(24, Number(access.trial_total_hours || (referralBonus ? 48 : 24)));
+
+    if(blocked){
+      $('accessGate').innerHTML = `<div class="access-inner">
+        <span class="access-kicker">Acesso ORB</span>
+        <h2>Esta conta está bloqueada.</h2>
+        <p>O painel não está disponível para esta conta.</p>
+        <div class="gate-actions"><button class="gate-secondary" onclick="location.href='./checkout.html'">Ver assinatura</button></div>
+      </div>`;
+      return;
+    }
+
+    if(!emailVerified){
+      $('accessGate').innerHTML = `<div class="access-inner">
+        <span class="access-kicker">Falta 1 etapa</span>
+        <h2>Confirme seu e-mail.</h2>
+        <p>Confirme o endereço no e-mail enviado pela ORB e depois entre novamente. Seu teste grátis ficará disponível assim que o e-mail estiver validado.</p>
+        <div class="gate-actions"><button id="gateLogout" class="gate-secondary">Sair e entrar novamente</button></div>
+      </div>`;
+      $('gateLogout')?.addEventListener('click', logout);
+      return;
+    }
+
+    if(trialAvailable){
+      const title = referralBonus
+        ? `Seu cupom liberou ${totalHours}h grátis.`
+        : `Teste a ORB por ${totalHours} horas.`;
+
+      const description = referralBonus
+        ? `Você recebeu as 24h padrão da ORB + ${Number(access.referral_bonus_hours || 24)}h extras pela indicação${access.referral_code ? ` (${esc(access.referral_code)})` : ''}. Não precisa cadastrar cartão.`
+        : `Você recebe acesso completo ao painel por ${totalHours} horas. Não precisa cadastrar cartão para começar.`;
+
+      $('accessGate').innerHTML = `<div class="access-inner">
+        <span class="access-kicker ${referralBonus ? 'bonus' : ''}">${referralBonus ? '+24h de bônus • Influencer' : `${totalHours} horas grátis`}</span>
+        <h2>${title}</h2>
+        <p>${description}</p>
+        <div class="access-points">
+          <span class="access-point">✓ E-mail verificado</span>
+          <span class="access-point">✓ Sem cartão</span>
+          <span class="access-point">✓ Acesso completo</span>
+          ${referralBonus ? '<span class="access-point bonus">✓ Bônus de indicação aplicado</span>' : ''}
+        </div>
+        <div id="turnstileBox" class="turnstile-wrap"><span class="muted">Carregando verificação...</span></div>
+        <div class="gate-actions">
+          <button id="startTrialBtn" class="gate-primary" data-hours="${totalHours}" disabled>Ativar ${totalHours}h grátis</button>
+          <button class="gate-secondary" onclick="location.href='./checkout.html'">Prefiro assinar</button>
+        </div>
+        <div id="gateError" class="gate-error"></div>
+        <div class="gate-note">O teste é liberado uma vez por conta/dispositivo e começa somente quando você clicar em ativar.</div>
+      </div>`;
+
+      $('startTrialBtn')?.addEventListener('click', startFreeTrial);
+      setTimeout(() => renderTurnstile(), 0);
+      return;
+    }
+
+    if(trialUsed){
+      $('accessGate').innerHTML = `<div class="access-inner">
+        <span class="access-kicker">Teste utilizado</span>
+        <h2>Seu período grátis terminou.</h2>
+        <p>Para continuar recebendo as ofertas do Caçador, ative sua assinatura ORB.</p>
+        <div class="gate-actions">
+          <button class="gate-primary" onclick="location.href='./checkout.html'">Assinar ORB</button>
+        </div>
+      </div>`;
+      return;
+    }
+
+    $('accessGate').innerHTML = `<div class="access-inner">
+      <span class="access-kicker">Acesso ORB</span>
+      <h2>Seu acesso ainda não está ativo.</h2>
+      <p>Você pode assinar a ORB para liberar o painel.</p>
+      <div class="gate-actions"><button class="gate-primary" onclick="location.href='./checkout.html'">Assinar ORB</button></div>
+    </div>`;
+  }
+
+  function whatsappUrl(message){
+    const phone = String(C.supportWhatsApp || '').replace(/\D/g,'');
+    const text = encodeURIComponent(message);
+    return phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`;
+  }
+
+  function openInfluencerSupport(){
+    window.open(
+      whatsappUrl('Olá! Eu uso a ORB e tenho interesse em participar do programa de influencers/afiliados. Quero saber como funciona para entrar.'),
+      '_blank',
+      'noopener'
+    );
+  }
 
   const REF_KEY = 'orb-referral-code-v1';
   const REF_SOURCE_KEY = 'orb-referral-source-v1';
@@ -336,7 +620,7 @@
       if(data?.session){
         const claim = await claimPendingReferral();
         if(claim?.ok && !claim?.skipped && claim?.data?.extra_trial_hours){
-          $('loginSuccess').textContent = 'Conta criada e cupom vinculado. Seu teste terá 48h no total.';
+          $('loginSuccess').textContent = 'Conta criada e cupom vinculado. Depois de confirmar o e-mail, você poderá ativar 48h grátis.';
         } else {
           $('loginSuccess').textContent = 'Conta criada. Seu login funcionou; agora o acesso ao painel precisa estar autorizado.';
         }
@@ -372,32 +656,76 @@
     await syncSubscription();
     await loadData();
   }
+
   async function loadData(){
     $('updated').innerHTML = '<span class="dot"></span><span>Atualizando...</span>';
     $('refreshBtn').disabled = true;
-    const { data, error } = await sb.storage.from(C.panelBucket || 'orb-panel').download('latest.json');
-    $('refreshBtn').disabled = false;
-    if(error){
-      const msg = String(error.message || '').toLowerCase();
-      const denied = msg.includes('unauthorized') || msg.includes('not found') || msg.includes('permission') || msg.includes('403');
-      $('updated').innerHTML = `<span class="dot" style="background:#d34848"></span><span>${denied ? 'Conta sem acesso liberado.' : 'Ainda não há dados publicados.'}</span>`;
-      $('grid').innerHTML = denied
-        ? '<div class="empty"><b>Seu login existe, mas o acesso ainda não está ativo.</b><div style="margin:10px 0 16px">Assine a ORB para liberar o painel.</div><button class="action copy" style="max-width:280px" onclick="location.href=\'./checkout.html\'">Assinar ORB — R$ 39,90/mês</button></div>'
-        : '<div class="empty"><b>Nenhuma fila publicada ainda.</b>Assim que o Caçador enviar o primeiro latest.json, ela aparece aqui.</div>';
-      return;
+
+    try {
+      const data = await invokeEdge('orb-panel-data', {});
+      $('refreshBtn').disabled = false;
+
+      if(!data?.ok){
+        $('updated').innerHTML = '<span class="dot" style="background:#ea6a32"></span><span>Acesso ainda não liberado.</span>';
+        $('sideStatusText').textContent = 'Conta aguardando ativação.';
+        renderAccessGate(data?.access || {});
+        return;
+      }
+
+      setDashboardVisible(true);
+      resetTurnstile();
+
+      latestPayload = data.payload || {};
+      offers = latestPayload.offers || [];
+
+      const access = data.access || {};
+      if(access.trial_active && access.trial_ends_at){
+        startTrialCountdown(access.trial_ends_at, access.trial_total_hours || 24);
+      } else {
+        stopTrialCountdown();
+      }
+
+      const stats = latestPayload.stats || {};
+      $('mRows').textContent = fmt(stats.total_rows);
+      $('mUnique').textContent = fmt(stats.unique_items);
+      $('mCandidates').textContent = fmt(stats.candidates);
+      $('mQueue').textContent = fmt(stats.queue ?? offers.length);
+
+      const dtText = formatOrbDate(latestPayload.generated_at, 'agora');
+      $('updated').innerHTML = `<span class="dot"></span><span>Atualizado em ${esc(dtText)}</span>`;
+      $('sideStatusText').textContent = access.trial_active
+        ? `Teste grátis ativo • fila recebida em ${dtText}.`
+        : `Última fila recebida em ${dtText}.`;
+
+      renderFeeds(latestPayload.feeds || []);
+
+      const cats = [...new Set(offers.map(o => o.categoria).filter(Boolean))]
+        .sort((a,b) => a.localeCompare(b,'pt-BR'));
+
+      $('cat').innerHTML =
+        '<option value="">Todas as categorias</option>' +
+        cats.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
+
+      render();
+    } catch(e) {
+      $('refreshBtn').disabled = false;
+      stopTrialCountdown();
+      setDashboardVisible(false);
+
+      $('updated').innerHTML = '<span class="dot" style="background:#d34848"></span><span>Falha ao carregar o painel.</span>';
+      $('sideStatusText').textContent = 'Falha de conexão com o backend.';
+
+      $('accessGate').innerHTML = `<div class="access-inner">
+        <span class="access-kicker">ORB</span>
+        <h2>Não consegui carregar seu acesso.</h2>
+        <p>${esc(e.message || 'Falha temporária no backend.')}</p>
+        <div class="gate-actions"><button id="retryPanelBtn" class="gate-primary">Tentar novamente</button></div>
+      </div>`;
+
+      $('retryPanelBtn')?.addEventListener('click', loadData);
     }
-    try { latestPayload = JSON.parse(await data.text()); } catch { toast('Não foi possível ler os dados.'); return; }
-    offers = latestPayload.offers || [];
-    const stats = latestPayload.stats || {};
-    $('mRows').textContent = fmt(stats.total_rows); $('mUnique').textContent = fmt(stats.unique_items); $('mCandidates').textContent = fmt(stats.candidates); $('mQueue').textContent = fmt(stats.queue ?? offers.length);
-    const dtText = formatOrbDate(latestPayload.generated_at, 'agora');
-    $('updated').innerHTML = `<span class="dot"></span><span>Atualizado em ${esc(dtText)}</span>`;
-    $('sideStatusText').textContent = `Última fila recebida em ${dtText}.`;
-    renderFeeds(latestPayload.feeds || []);
-    const cats = [...new Set(offers.map(o => o.categoria).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
-    $('cat').innerHTML = '<option value="">Todas as categorias</option>' + cats.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
-    render();
   }
+
   function renderFeeds(list){
     if(!list.length){
       $('feeds').innerHTML = '<div class="muted">Nenhum status de feed recebido.</div>';
@@ -461,7 +789,9 @@
   $('authSwitchBtn').addEventListener('click', () => setAuthMode(authMode === 'login' ? 'signup' : 'login'));
   $('search').addEventListener('input', render); $('cat').addEventListener('change', render); $('pendingBtn').addEventListener('click', () => { onlyPending = !onlyPending; $('pendingBtn').classList.toggle('active',onlyPending); render(); });
   $('refreshBtn').addEventListener('click', loadData); $('sideRefresh').addEventListener('click', loadData);
-  async function logout(){ await sb.auth.signOut(); location.reload(); }
+  $('beInfluencerBtn').addEventListener('click', openInfluencerSupport);
+  $('beInfluencerTopBtn').addEventListener('click', openInfluencerSupport);
+  async function logout(){ stopTrialCountdown(); await sb.auth.signOut(); location.reload(); }
   $('logoutBtn').addEventListener('click', logout); $('mobileLogout').addEventListener('click', logout);
   (async () => {
     const { data } = await sb.auth.getSession();
