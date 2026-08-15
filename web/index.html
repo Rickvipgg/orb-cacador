@@ -63,12 +63,24 @@
     .gate-secondary{height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;color:#2f2e36;padding:0 15px;font-weight:820;cursor:pointer}
     .gate-error{min-height:18px;color:#b42318;font-size:12px;margin-top:10px}
     .gate-note{font-size:10px;color:#97959f;margin-top:10px}
+    .affiliate-help{max-width:520px;margin:18px auto;border:1px solid #ddd7f5;border-radius:17px;background:linear-gradient(135deg,#faf8ff,#f4f1ff);overflow:hidden}
+    .affiliate-help summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 15px;cursor:pointer;color:#4f35a5;font-size:12px;font-weight:900;user-select:none}
+    .affiliate-help summary::-webkit-details-marker{display:none}
+    .affiliate-help summary:after{content:"⌄";font-size:18px;line-height:1;transition:transform .18s ease}
+    .affiliate-help[open] summary:after{transform:rotate(180deg)}
+    .affiliate-help-body{padding:0 15px 15px;border-top:1px solid rgba(124,77,255,.12)}
+    .affiliate-help-label{margin:13px 0 9px;color:#6c6976;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.07em}
+    .affiliate-route{display:flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1.5}
+    .affiliate-route span{display:inline-flex;align-items:center;min-height:29px;padding:5px 8px;border:1px solid #e5e0f7;border-radius:9px;background:#fff;color:#35323d;font-size:10px;font-weight:850;box-shadow:0 3px 10px rgba(67,45,133,.04)}
+    .affiliate-route i{color:#8c78cf;font-size:11px;font-style:normal;font-weight:900}
+    .affiliate-tip{margin:11px 0 0!important;color:#726e7c!important;font-size:10px!important;line-height:1.5!important}
+    .affiliate-warning{display:flex;align-items:flex-start;gap:7px;margin-top:11px;padding:9px 10px;border-radius:10px;background:#fff;color:#6b6478;font-size:10px;line-height:1.45}
 
     .mobile-head{display:none}
     @media(max-width:1050px){.app-shell{grid-template-columns:190px minmax(0,1fr)}.health-row{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.offer-card{min-height:216px}}
     @media(max-width:760px){
       .auth-shell{display:block;padding:0}.auth-story{display:none}.auth-form-wrap{min-height:100svh;padding:25px}.login-card:before{content:"";display:block;width:72px;height:72px;margin-bottom:28px;background:url('./favicon.svg') center/contain no-repeat}
-      .access-gate{padding:20px;border-radius:20px}.access-gate h2{font-size:26px}.gate-actions{display:grid;grid-template-columns:1fr}.gate-primary,.gate-secondary{width:100%}.trial-badge{height:38px;padding:0 10px;font-size:10px}
+      .access-gate{padding:20px;border-radius:20px}.access-gate h2{font-size:26px}.gate-actions{display:grid;grid-template-columns:1fr}.gate-primary,.gate-secondary{width:100%}.trial-badge{height:38px;padding:0 10px;font-size:10px}.affiliate-help{margin:17px 0}.affiliate-help summary{padding:13px}.affiliate-help-body{padding:0 13px 13px}.affiliate-route{gap:5px}.affiliate-route span{font-size:9px;padding:5px 7px}
       .app-shell{display:block;padding:0 12px 30px}.sidebar{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;padding:15px 2px 4px}.mobile-head .brand{font-size:22px}.mobile-head .orb-mark{transform:scale(.85);transform-origin:left center}.mobile-logout{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 10px;font-weight:800;font-size:11px}.topbar{height:auto;padding:12px 2px 6px}.headline h1{font-size:24px}.top-actions .icon-btn span.label{display:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{min-height:108px;padding:14px}.metric b{font-size:23px}.metric-icon{margin-bottom:13px}.health-row{display:block}.quick-card{display:none}.health-card{padding:13px;margin-bottom:8px}.feeds{margin-right:-13px}.toolbar{top:0;grid-template-columns:1fr auto;padding:8px 0}.toolbar select{grid-column:1/2}.search-wrap{grid-column:1/3}.filter-btn{grid-column:2/3;grid-row:2}.grid{gap:9px}.offer-card{grid-template-columns:86px minmax(0,1fr);gap:11px;padding:11px;border-radius:18px;min-height:0}.product-image{width:86px;height:86px;border-radius:13px}.offer-title{font-size:13px;margin:8px 0 7px}.now{font-size:20px}.actions{grid-column:1/-1;grid-template-columns:1.25fr .8fr .8fr}.action{height:40px}.meta .pill:nth-child(n+4){display:none}.toast{left:12px;right:12px;bottom:14px;text-align:center}.result-row{margin-top:3px}
     }
   </style>
@@ -338,11 +350,13 @@
     const input = $('affiliateIdInput');
     const btn = $('saveAffiliateIdBtn');
     const err = $('affiliateIdError');
-    const affiliateId = String(input?.value || '').trim();
+    const affiliateId = String(input?.value || '').replace(/\D/g, '').trim();
+
+    if(input) input.value = affiliateId;
 
     if(err) err.textContent = '';
-    if(affiliateId.length < 2 || affiliateId.length > 100){
-      if(err) err.textContent = 'Digite um ID de afiliado Shopee válido.';
+    if(!/^\d{5,30}$/.test(affiliateId)){
+      if(err) err.textContent = 'Cole somente os números do seu ID de Afiliado Shopee.';
       return;
     }
 
@@ -420,8 +434,26 @@
 
         <div class="field" style="max-width:520px;margin:22px auto 10px;text-align:left">
           <label for="affiliateIdInput">ID de afiliado Shopee</label>
-          <input id="affiliateIdInput" type="text" maxlength="100" autocomplete="off" placeholder="Cole aqui seu ID de afiliado">
+          <input id="affiliateIdInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="30" autocomplete="off" placeholder="Ex.: 12345678901">
         </div>
+
+        <details class="affiliate-help" open>
+          <summary>📍 Onde encontro meu ID no celular?</summary>
+          <div class="affiliate-help-body">
+            <div class="affiliate-help-label">Siga este caminho no aplicativo</div>
+            <div class="affiliate-route" aria-label="Shopee, Eu, Criadores e Afiliados, Conta, engrenagem, Configurações da Conta, ID de Afiliado">
+              <span>Shopee</span><i>→</i>
+              <span>Eu</span><i>→</i>
+              <span>Criadores e Afiliados</span><i>→</i>
+              <span>Conta</span><i>→</i>
+              <span>Engrenagem ⚙️</span><i>→</i>
+              <span>Configurações da Conta</span><i>→</i>
+              <span>ID de Afiliado</span>
+            </div>
+            <p class="affiliate-tip">Copie o número que aparece abaixo do seu nome de usuário, volte para a ORB e cole no campo acima.</p>
+            <div class="affiliate-warning"><span>⚠️</span><span>Não é o nome de usuário nem o ID de comprador. Copie especificamente o campo <strong>ID de Afiliado</strong>.</span></div>
+          </div>
+        </details>
 
         ${subId ? `<div class="gate-note" style="margin-top:8px">Seu Sub ID ORB já foi criado automaticamente: <strong>${esc(subId)}</strong></div>` : ''}
 
@@ -442,6 +474,9 @@
       $('saveAffiliateIdBtn')?.addEventListener('click', saveShopeeAffiliateId);
       $('affiliateIdInput')?.addEventListener('keydown', e => {
         if(e.key === 'Enter') saveShopeeAffiliateId();
+      });
+      $('affiliateIdInput')?.addEventListener('input', e => {
+        e.target.value = String(e.target.value || '').replace(/\D/g, '').slice(0, 30);
       });
       $('gateLogout')?.addEventListener('click', logout);
       setTimeout(() => $('affiliateIdInput')?.focus(), 50);
